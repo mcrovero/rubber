@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:rubber/rubber_animation_controller.dart';
+import 'package:rubber/animation_controller.dart';
 
 enum BSState {
   expanded,
