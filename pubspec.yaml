@@ -1,8 +1,8 @@
 name: rubber
 description: Simple yet powerful material bottomsheet implementation
-version: 0.0.1
+version: 0.1.0
 author: Mattia Crovero <mcrovero@gmail.com>
-homepage: https://github.com/Matt2397/rubber
+homepage: https://github.com/mcrovero/rubber
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
