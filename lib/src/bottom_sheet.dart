@@ -26,13 +26,6 @@ class RubberBottomSheet extends StatefulWidget {
 
 class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin {
 
-  final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
-
-  double get _childHeight {
-    final RenderBox renderBox = _childKey.currentContext.findRenderObject();
-    return renderBox.size.height;
-  }
-
   RubberAnimationController get _controller => widget.animationController;
 
   ValueNotifier<bool> display = ValueNotifier(true);
@@ -83,7 +76,6 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       animationController: _controller,
       display: display,
       child: Stack(
-        key: _childKey,
         children: <Widget>[
           widget.lowerLayer,
           Align(child: elem, alignment: Alignment.bottomRight)
