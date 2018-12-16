@@ -10,24 +10,26 @@ enum BSState {
 }
 
 const double _kMinFlingVelocity = 700.0;
-const double _kCompleteFlingVelocity = 6000.0;
-const double _kExpandProgressThreshold = 0.75;
-const double _kHalfExpandProgressThreshold = 0.5;
-const double _kCollapseProgressThreshold = 0.25;
-
+const double _kCompleteFlingVelocity = 5000.0;
 
 class RubberBottomSheet extends StatefulWidget {
 
   const RubberBottomSheet({Key key,
-    @required this.stateController,
+    this.animationController,
     @required this.lowerLayer,
-    @required this.upperLayer})
-      : assert(stateController != null),
+    @required this.upperLayer,
+    this.lowerBound = 0.2,
+    this.halfBound,
+    this.upperBound = 0.9})
+      : assert(animationController != null),
         super(key: key);
 
   final Widget lowerLayer;
   final Widget upperLayer;
-  final RubberAnimationController stateController;
+  final double lowerBound;
+  final double halfBound;
+  final double upperBound;
+  final RubberAnimationController animationController;
 
   @override
   _RubberBottomSheetState createState() => _RubberBottomSheetState();
@@ -36,46 +38,45 @@ class RubberBottomSheet extends StatefulWidget {
 
 class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin {
 
-  //final GlobalKey _ujibooBottomSheetKey = GlobalKey(debugLabel: 'Ujiboo bottom sheet');
+  ValueNotifier<BSState> currentState = ValueNotifier(BSState.half_expanded);
 
-  BSState currentState = BSState.half_expanded;
-  RubberAnimationController get _controller => widget.stateController;
+  RubberAnimationController _defaultController;
+  RubberAnimationController get _controller => widget.animationController != null ? widget.animationController : _defaultController;
 
   ValueNotifier<bool> display = ValueNotifier(true);
 
+  bool get halfState => widget.halfBound != null;
+
   @override
   void initState() {
-    //widget.display.addListener(_onDisplayChanged);
+    _defaultController = RubberAnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1000),
+      value: 1.0,
+    );
     super.initState();
   }
 
-  void _onDisplayChanged() {
-    print("display changed");
-    setState(() {
-      //
-    });
-  }
-
-
   @override
   void dispose() {
-    //widget.display.removeListener(_onDisplayChanged);
     _controller.dispose();
     super.dispose();
   }
 
   void expand() {
-    if (currentState != BSState.expanded) {
+    if (currentState.value != BSState.expanded) {
       _controller.expand();
     }
   }
+
   void collapse() {
-    if (currentState != BSState.collapsed) {
+    if (currentState.value != BSState.collapsed) {
       _controller.collapse();
     }
   }
+
   void half() {
-    if(currentState != BSState.half_expanded) {
+    if (currentState.value != BSState.half_expanded) {
       _controller.halfExpand();
     }
   }
@@ -83,17 +84,20 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   Widget _buildSlideAnimation(BuildContext context, Widget child) {
     return Container(
         alignment: AlignmentDirectional.topStart,
-        height: 100 + _controller.value * (screenHeight - 250),
+        height: _controller.value * screenHeight, // ToDo: change with child height to support boxed bottomsheets
         child: child
     );
   }
 
   double screenHeight;
+
   @override
   Widget build(BuildContext context) {
     var elem;
-    if(display.value) {
-      final Size screenSize = MediaQuery.of(context).size;
+    if (display.value) {
+      final Size screenSize = MediaQuery
+          .of(context)
+          .size;
       screenHeight = screenSize.height;
       var bottomSheet = GestureDetector(
         child: widget.upperLayer,
@@ -109,52 +113,74 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       elem = Container();
     }
     return RubberBottomSheetScope(
-      display: display,
-      child: Stack(
-        children: <Widget>[
-          widget.lowerLayer,
-          Align(child: elem, alignment: Alignment.bottomRight)
-        ],
-      )
+        display: display,
+        state: currentState,
+        child: Stack(
+          children: <Widget>[
+            widget.lowerLayer,
+            Align(child: elem, alignment: Alignment.bottomRight)
+          ],
+        )
     );
   }
 
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
-    if(_controller.value > 1 || _controller.value < 0) {
+    if (_controller.value > 1 || _controller.value < 0) {
       var diff;
-      if(_controller.value < 0) {
+      if (_controller.value < 0) {
         diff = -_controller.value;
       } else {
         diff = _controller.value - 1;
       }
-      var friction =  0.52 * pow(1 - diff, 2);
+      var friction = 0.52 * pow(1 - diff, 2);
       _controller.value -= details.primaryDelta / screenHeight * friction;
     } else {
       _controller.value -= details.primaryDelta / screenHeight;
     }
   }
 
+
   void _onVerticalDragEnd(DragEndDetails details) {
-    final double flingVelocity = -details.velocity.pixelsPerSecond.dy / screenHeight;
+    final double flingVelocity = -details.velocity.pixelsPerSecond.dy /
+        screenHeight;
     print("${details.velocity.pixelsPerSecond.dy.abs()} $flingVelocity");
-    if(details.velocity.pixelsPerSecond.dy.abs() > _kCompleteFlingVelocity) {
-      _controller.fling(_controller.lowerBound,_controller.upperBound,velocity: flingVelocity);
-    }
-    else if (details.velocity.pixelsPerSecond.dy.abs() > _kMinFlingVelocity) {
-      if(_controller.value > _kHalfExpandProgressThreshold) {
-        _controller.fling(_controller.halfBound,_controller.upperBound,velocity: flingVelocity);
-      } else {
-        _controller.fling(_controller.lowerBound,_controller.halfBound,velocity: flingVelocity);
-      }
+
+    if (details.velocity.pixelsPerSecond.dy.abs() > _kCompleteFlingVelocity) {
+      _controller.fling(_controller.lowerBound, _controller.upperBound,
+          velocity: flingVelocity);
     } else {
-      if (_controller.value > _kExpandProgressThreshold) {
-        _controller.expand();
-      }
-      else if (_controller.value > _kCollapseProgressThreshold) {
-        _controller.halfExpand();
+      if (halfState) {
+        if (details.velocity.pixelsPerSecond.dy.abs() > _kMinFlingVelocity) {
+          if (_controller.value > widget.halfBound) {
+            _controller.fling(_controller.halfBound, _controller.upperBound,
+                velocity: flingVelocity);
+          } else {
+            _controller.fling(_controller.lowerBound, _controller.halfBound,
+                velocity: flingVelocity);
+          }
+        } else {
+          if (_controller.value > (widget.upperBound - widget.halfBound) / 2) {
+            _controller.expand();
+          }
+          else
+          if (_controller.value > (widget.halfBound - widget.lowerBound) / 2) {
+            _controller.halfExpand();
+          } else {
+            _controller.collapse();
+          }
+        }
       } else {
-        _controller.collapse();
+        if (details.velocity.pixelsPerSecond.dy.abs() > _kMinFlingVelocity) {
+          _controller.fling(_controller.lowerBound, _controller.upperBound,
+              velocity: flingVelocity);
+        } else {
+          if (_controller.value > (widget.upperBound - widget.lowerBound) / 2) {
+            _controller.expand();
+          } else {
+            _controller.collapse();
+          }
+        }
       }
     }
   }
@@ -163,10 +189,12 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
 class RubberBottomSheetScope extends InheritedWidget {
   final ValueNotifier<bool> display;
+  final ValueNotifier<BSState> state;
 
   RubberBottomSheetScope({
     Key key,
     @required this.display,
+    @required this.state,
     @required Widget child,
   }) : super(key: key, child: child);
 
