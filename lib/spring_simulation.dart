@@ -33,7 +33,7 @@ class RubberSpringSimulation extends Simulation {
   bool isDone(double time) {
     if(nearZero(_solution.x(time),0.001))
       zeros++;
-    print("zeros: $zeros");
+
     if(zeros >= 10) {
       return true;
     }

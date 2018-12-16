@@ -7,7 +7,7 @@ import 'package:rubber/spring_simulation.dart';
 
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
-final SpringDescription _kFlingSpringDescription = SpringDescription.withDampingRatio(
+final SpringDescription _kFlingSpringDefaultDescription = SpringDescription.withDampingRatio(
   mass: 1.5,
   stiffness: 300.0,
   ratio: 0.4,
@@ -18,23 +18,15 @@ const Tolerance _kFlingTolerance = Tolerance(
   distance: 0.01,
 );
 
-/// The status of an animation
-enum RubberAnimationStatus {
-  /// The animation is stopped at the beginning
-  dismissed,
-
-  /// The animation is running from beginning to end
-  forward,
-
-  /// The animation is running backwards, from end to beginning
-  reverse,
-
-  /// The animation is stopped at the end
-  completed,
+enum AnimationState {
+  expanded,
+  half_expanded,
+  collapsed
 }
 
 class RubberAnimationController extends Animation<double>
     with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
+
   /// Creates an animation controller.
   ///
   /// * [value] is the initial value of the animation. If defaults to the lower
@@ -60,30 +52,33 @@ class RubberAnimationController extends Animation<double>
   /// * `vsync` is the [TickerProvider] for the current context. It can be
   ///   changed by calling [resync]. It is required and must not be null. See
   ///   [TickerProvider] for advice on obtaining a ticker provider.
+  ///
   RubberAnimationController({
     double value,
     this.duration,
     this.debugLabel,
-    this.lowerBound = 0.0,
-    this.halfBound = 0.4,
-    this.upperBound = 1.0,
+    this.lowerBound = 0.2,
+    this.halfBound,
+    this.upperBound = 0.9,
     this.animationBehavior = AnimationBehavior.normal,
+    springDescription,
     @required TickerProvider vsync,
   }) : assert(lowerBound != null),
         assert(upperBound != null),
         assert(upperBound >= lowerBound),
         assert(vsync != null) {
+    if(springDescription!=null) _springDescription = springDescription;
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
 
-  /// The value at which this animation is deemed to be dismissed.
+  /// The value at which this animation is collapsed.
   final double lowerBound;
 
-  /// The value at which this animation is deemed to be half completed.
+  /// The value at which this animation is half expanded
   final double halfBound;
 
-  /// The value at which this animation is deemed to be completed.
+  /// The value at which this animation is expanded.
   final double upperBound;
 
   /// A label that is used in the [toString] output. Intended to aid with
@@ -97,6 +92,8 @@ class RubberAnimationController extends Animation<double>
   /// constructor, and [AnimationBehavior.preserve] for the
   /// [new AnimationController.unbounded] constructor.
   final AnimationBehavior animationBehavior;
+
+  SpringDescription _springDescription = _kFlingSpringDefaultDescription;
 
   /// Returns an [Animation<double>] for this animation controller, so that a
   /// pointer to this object can be passed around without allowing users of that
@@ -117,6 +114,8 @@ class RubberAnimationController extends Animation<double>
 
   Simulation _simulation;
 
+  AnimationState animationState;
+
   /// The current value of the animation.
   ///
   /// Setting this value notifies all the listeners that the value
@@ -135,19 +134,6 @@ class RubberAnimationController extends Animation<double>
   ///
   /// Value listeners are notified even if this does not change the value.
   /// Status listeners are notified if the animation was previously playing.
-  ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
-  ///
-  /// See also:
-  ///
-  ///  * [reset], which is equivalent to setting [value] to [lowerBound].
-  ///  * [stop], which aborts the animation without changing its value or status
-  ///    and without dispatching any notifications other than completing or
-  ///    canceling the [TickerFuture].
-  ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
-  ///    which start the animation controller.
   set value(double newValue) {
     assert(newValue != null);
     stop();
@@ -158,18 +144,6 @@ class RubberAnimationController extends Animation<double>
 
   /// Sets the controller's value to [lowerBound], stopping the animation (if
   /// in progress), and resetting to its beginning point, or dismissed state.
-  ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
-  ///
-  /// See also:
-  ///
-  ///  * [value], which can be explicitly set to a specific value as desired.
-  ///  * [forward], which starts the animation in the forward direction.
-  ///  * [stop], which aborts the animation without changing its value or status
-  ///    and without dispatching any notifications other than completing or
-  ///    canceling the [TickerFuture].
   void reset() {
     value = lowerBound;
   }
@@ -186,6 +160,12 @@ class RubberAnimationController extends Animation<double>
 
   void _internalSetValue(double newValue) {
     _value = newValue;
+    if (_value == lowerBound || _value == halfBound || _value == upperBound) {
+      _status = AnimationStatus.completed;
+    } else {
+      _status = AnimationStatus.forward;
+    }
+    _checkStatusChanged();
   }
 
   /// The amount of time that has passed between the time the animation started
@@ -219,7 +199,6 @@ class RubberAnimationController extends Animation<double>
       }
       return true;
     }());
-    //_direction = _AnimationDirection.forward;
     if (from != null)
       value = from;
     return _animateToInternal(upperBound);
@@ -235,7 +214,6 @@ class RubberAnimationController extends Animation<double>
       }
       return true;
     }());
-    //_direction = _AnimationDirection.collapsed_to_half_expanded;
     if (from != null)
       value = from;
     return _animateToInternal(halfBound);
@@ -256,15 +234,24 @@ class RubberAnimationController extends Animation<double>
     return _animateToInternal(lowerBound);
   }
 
+  void _checkState() {
+    if(nearZero(value - lowerBound, 0.1)) {
+      animationState = AnimationState.collapsed;
+    }
+    else if(nearZero(value - halfBound, 0.1)) {
+      animationState = AnimationState.half_expanded;
+    }
+    else if(nearZero(value - upperBound, 0.1)) {
+      animationState = AnimationState.expanded;
+    }
+  }
+
   TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.easeOut, AnimationBehavior animationBehavior }) {
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     double scale = 1.0;
     if (SemanticsBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-        // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
-        // duration to limit most animations to a single frame.
-        // TODO(jonahwilliams): determine a better process for setting duration.
           scale = 0.05;
           break;
         case AnimationBehavior.preserve:
@@ -297,6 +284,7 @@ class RubberAnimationController extends Animation<double>
         _value = target.clamp(lowerBound, upperBound);
         notifyListeners();
       }
+      _status = AnimationStatus.completed;
       _checkStatusChanged();
       return TickerFuture.complete();
     }
@@ -305,23 +293,10 @@ class RubberAnimationController extends Animation<double>
     return _startSimulation(_InterpolationSimulation(_value, target, simulationDuration, curve, scale));
   }
 
-  /// Drives the animation with a critically damped spring (within [lowerBound]
-  /// and [upperBound]) and initial velocity.
-  ///
-  /// If velocity is positive, the animation will complete, otherwise it will
-  /// dismiss.
-  ///
-  /// Returns a [TickerFuture] that completes when the animation is complete.
-  ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
   TickerFuture fling(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
-    //_direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? from
         : to;
     double scale = 1.0;
-    print("from: $from to: $to velocity: $velocity target: $target");
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     if (SemanticsBinding.instance.disableAnimations) {
       switch (behavior) {
@@ -332,7 +307,8 @@ class RubberAnimationController extends Animation<double>
           break;
       }
     }
-    final Simulation simulation = RubberSpringSimulation(_kFlingSpringDescription, value, target, velocity * scale)
+
+    final Simulation simulation = RubberSpringSimulation(_springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
     return animateWith(simulation);
   }
@@ -340,10 +316,6 @@ class RubberAnimationController extends Animation<double>
   /// Drives the animation according to the given simulation.
   ///
   /// Returns a [TickerFuture] that completes when the animation is complete.
-  ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
   TickerFuture animateWith(Simulation simulation) {
     stop();
     return _startSimulation(simulation);
@@ -356,6 +328,7 @@ class RubberAnimationController extends Animation<double>
     _lastElapsedDuration = Duration.zero;
     _value = simulation.x(0.0);
     final TickerFuture result = _ticker.start();
+    _status = AnimationStatus.forward;
     _checkStatusChanged();
     return result;
   }
@@ -364,19 +337,6 @@ class RubberAnimationController extends Animation<double>
   ///
   /// This does not trigger any notifications. The animation stops in its
   /// current state.
-  ///
-  /// By default, the most recently returned [TickerFuture] is marked as having
-  /// been canceled, meaning the future never completes and its
-  /// [TickerFuture.orCancel] derivative future completes with a [TickerCanceled]
-  /// error. By passing the `canceled` argument with the value false, this is
-  /// reversed, and the futures complete successfully.
-  ///
-  /// See also:
-  ///
-  ///  * [reset], which stops the animation and resets it to the [lowerBound],
-  ///    and which does send notifications.
-  ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
-  ///    which restart the animation controller.
   void stop({ bool canceled = true }) {
     _simulation = null;
     _lastElapsedDuration = null;
@@ -385,10 +345,6 @@ class RubberAnimationController extends Animation<double>
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
-  ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
   @override
   void dispose() {
     assert(() {
@@ -407,11 +363,14 @@ class RubberAnimationController extends Animation<double>
     super.dispose();
   }
 
-  AnimationStatus _lastReportedStatus = AnimationStatus.dismissed;
+  AnimationState _lastReportedState = AnimationState.collapsed;
+  //AnimationStatus _lastReportedStatus = AnimationStatus.dismissed;
   void _checkStatusChanged() {
     final AnimationStatus newStatus = status;
-    if (_lastReportedStatus != newStatus) {
-      _lastReportedStatus = newStatus;
+    final AnimationState newState = animationState;
+    if (_lastReportedState != newState) {
+      _lastReportedState = newState;
+      _checkState();
       notifyStatusListeners(newStatus);
     }
   }
@@ -422,11 +381,12 @@ class RubberAnimationController extends Animation<double>
     assert(elapsedInSeconds >= 0.0);
     _value = _simulation.x(elapsedInSeconds);
     if (_simulation.isDone(elapsedInSeconds)) {
-      print("cancelled");
+      _status = AnimationStatus.completed;
       stop(canceled: false);
+      _checkStatusChanged();
     }
     notifyListeners();
-    _checkStatusChanged();
+
   }
 
   @override
