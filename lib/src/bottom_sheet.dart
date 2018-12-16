@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:rubber/animation_controller.dart';
+import 'package:rubber/src/animation_controller.dart';
 
 const double _kMinFlingVelocity = 700.0;
 const double _kCompleteFlingVelocity = 5000.0;
@@ -26,6 +26,13 @@ class RubberBottomSheet extends StatefulWidget {
 
 class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin {
 
+  final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
+
+  double get _childHeight {
+    final RenderBox renderBox = _childKey.currentContext.findRenderObject();
+    return renderBox.size.height;
+  }
+
   RubberAnimationController get _controller => widget.animationController;
 
   ValueNotifier<bool> display = ValueNotifier(true);
@@ -43,9 +50,10 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   }
 
   Widget _buildSlideAnimation(BuildContext context, Widget child) {
-    return Container(
+    //print("child height : $_childHeight");
+    return Align(
         alignment: AlignmentDirectional.topStart,
-        height: _controller.value * screenHeight, // ToDo: change with child height to support boxed bottomsheets
+        heightFactor: widget.animationController.value,
         child: child
     );
   }
@@ -75,6 +83,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       animationController: _controller,
       display: display,
       child: Stack(
+        key: _childKey,
         children: <Widget>[
           widget.lowerLayer,
           Align(child: elem, alignment: Alignment.bottomRight)
@@ -98,14 +107,11 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     }
 
     _controller.value -= details.primaryDelta / screenHeight * friction;
-
   }
 
-
   void _onVerticalDragEnd(DragEndDetails details) {
-    final double flingVelocity = -details.velocity.pixelsPerSecond.dy /
-        screenHeight;
-
+    final double flingVelocity = -details.velocity.pixelsPerSecond.dy / screenHeight;
+    print("flingVelocity: $flingVelocity");
     if (details.velocity.pixelsPerSecond.dy.abs() > _kCompleteFlingVelocity) {
       _controller.fling(_controller.lowerBound, _controller.upperBound,
           velocity: flingVelocity);
@@ -120,11 +126,10 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
                 velocity: flingVelocity);
           }
         } else {
-          if (_controller.value > (_controller.upperBound - _controller.halfBound) / 2) {
+          if (_controller.value > (_controller.upperBound + _controller.halfBound) / 2) {
             _controller.expand();
           }
-          else
-          if (_controller.value > (_controller.halfBound - _controller.lowerBound) / 2) {
+          else if (_controller.value > (_controller.halfBound + _controller.lowerBound) / 2) {
             _controller.halfExpand();
           } else {
             _controller.collapse();

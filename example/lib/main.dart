@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:rubber/animation_controller.dart';
-import 'package:rubber/bottom_sheet.dart';
+import 'package:rubber/rubber.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,9 +10,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.cyan,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Rubber BottomSheet Demo'),
     );
   }
 }
@@ -38,7 +37,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
         lowerBound: 0.15,
         halfBound: 0.5,
         upperBound: 0.9,
-        duration: Duration(milliseconds: 1000)
+        duration: Duration(milliseconds: 200)
     );
     _controller.addStatusListener(_statusListener);
 
@@ -56,23 +55,27 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   }
 
   void _expand() {
-    _controller.expand();
+    _controller.launchTo(_controller.upperBound);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title,style: TextStyle(color: Colors.cyan[900]),),
       ),
-      body: RubberBottomSheet(
-        lowerLayer: _getLowerLayer(),
-        upperLayer: _getUpperLayer(),
-        animationController: _controller,
+      body: Container(
+        child: RubberBottomSheet(
+          lowerLayer: _getLowerLayer(),
+          upperLayer: _getUpperLayer(),
+          animationController: _controller,
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _expand,
         tooltip: 'Expand',
+        backgroundColor: Colors.cyan[900],
+        foregroundColor: Colors.cyan[400],
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
@@ -81,14 +84,14 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   Widget _getLowerLayer() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.teal
+        color: Colors.cyan[100]
       ),
     );
   }
   Widget _getUpperLayer() {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.black45
+          color: Colors.cyan
       ),
     );
   }

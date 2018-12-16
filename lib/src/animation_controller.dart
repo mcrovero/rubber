@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
-import 'package:rubber/spring_simulation.dart';
+import 'package:rubber/src/spring_simulation.dart';
 
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
@@ -188,7 +188,6 @@ class RubberAnimationController extends Animation<double>
   AnimationStatus _status;
 
   TickerFuture expand({ double from }) {
-    print("expand");
     assert(() {
       if (duration == null) {
         throw FlutterError(
@@ -246,7 +245,7 @@ class RubberAnimationController extends Animation<double>
     }
   }
 
-  TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.easeOut, AnimationBehavior animationBehavior }) {
+  TickerFuture _animateToInternal(double target, { Curve curve = Curves.easeOut, AnimationBehavior animationBehavior }) {
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     double scale = 1.0;
     if (SemanticsBinding.instance.disableAnimations) {
@@ -293,9 +292,57 @@ class RubberAnimationController extends Animation<double>
     return _startSimulation(_InterpolationSimulation(_value, target, simulationDuration, curve, scale));
   }
 
+  final double launchSpeed = 7;
+  TickerFuture launchTo(double target) {
+    switch(animationState) {
+      case AnimationState.collapsed:
+        if(target == upperBound) {
+          return launch(lowerBound, upperBound, velocity: launchSpeed);
+        } else {
+          return launch(lowerBound, halfBound, velocity: launchSpeed);
+        }
+        break;
+      case AnimationState.half_expanded:
+        if(target == upperBound) {
+          return launch(halfBound,upperBound,velocity: -launchSpeed);
+        } else {
+          return launch(lowerBound,halfBound,velocity: launchSpeed);
+        }
+        break;
+      case AnimationState.expanded:
+        if(target == halfBound) {
+          return launch(halfBound,upperBound,velocity: launchSpeed);
+        } else {
+          return launch(lowerBound,upperBound,velocity: launchSpeed);
+        }
+        break;
+    }
+    return null;
+  }
+  TickerFuture launch(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
+    final double target = velocity < 0.0 ? from : to;
+    double scale = 1.0;
+    final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
+    if (SemanticsBinding.instance.disableAnimations) {
+      switch (behavior) {
+        case AnimationBehavior.normal:
+          scale = 200.0;
+          break;
+        case AnimationBehavior.preserve:
+          break;
+      }
+    }
+
+    print("value: $value");
+    final Simulation simulation = RubberSpringSimulation(_springDescription, value, target, velocity * scale)
+      ..tolerance = _kFlingTolerance;
+    return animateWith(simulation);
+  }
+
   TickerFuture fling(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
-    final double target = velocity < 0.0 ? from
-        : to;
+    final double target = velocity < 0.0 ? from : to;
+    //print("animationState $animationState from: $from, to: $to, target: $target velocity: $velocity, value: $value");
+
     double scale = 1.0;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     if (SemanticsBinding.instance.disableAnimations) {

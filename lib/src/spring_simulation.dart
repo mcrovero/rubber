@@ -9,6 +9,7 @@ import 'package:flutter/physics.dart';
 class RubberSpringSimulation extends Simulation {
 
   int zeros = 0;
+  double stopTime = 1000.0;
 
   RubberSpringSimulation(
       SpringDescription spring,
@@ -24,17 +25,24 @@ class RubberSpringSimulation extends Simulation {
   final _SpringSolution _solution;
 
   @override
-  double x(double time) => _endPosition + _solution.x(time);
+  double x(double time) {
+
+    if(nearZero(_solution.x(time),0.0001)) {
+      return _endPosition;
+    }
+    return _endPosition + _solution.x(time);
+  }
 
   @override
   double dx(double time) => _solution.dx(time);
 
   @override
   bool isDone(double time) {
-    if(nearZero(_solution.x(time),0.001))
+    if(nearZero(_solution.x(time),0.0001))
       zeros++;
 
-    if(zeros >= 10) {
+    if(zeros >= 30) {
+      stopTime = time;
       return true;
     }
     return false;
