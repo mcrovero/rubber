@@ -57,9 +57,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   void _expand() {
     _controller.launchTo(AnimationState.expanded);
   }
-  void _hide() {
-    _controller.visibility = !_controller.visibility;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +75,9 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           FloatingActionButton(
-            onPressed: _hide,
+            onPressed: () {
+              _controller.visibility = !_controller.visibility;
+            },
             backgroundColor: Colors.cyan[900],
             foregroundColor: Colors.cyan[400],
             child: Icon(Icons.visibility),

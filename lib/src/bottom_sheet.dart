@@ -45,16 +45,9 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   bool _display = true;
   void _statusListener(AnimationStatus status) {
-    if(_controller.visibility && _display) {
-      setState((){
-        _display = false;
-      });
-    }
-    if(!_controller.visibility && !_display){
-      setState((){
-        _display = true;
-      });
-    }
+    setState((){
+      _display = _controller.visibility;
+    });
   }
 
   Widget _buildSlideAnimation(BuildContext context, Widget child) {

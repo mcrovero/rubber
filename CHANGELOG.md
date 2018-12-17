@@ -1,3 +1,7 @@
+## [0.1.7] - 17/12/2018
+
+* Fixed example and hiding
+
 ## [0.1.6] - 17/12/2018
 
 * Fixed animation value < 0 or > 1
