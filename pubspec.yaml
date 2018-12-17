@@ -1,6 +1,6 @@
 name: rubber
-description: Simple yet powerful material bottomsheet implementation
-version: 0.1.1
+description: An elastic material bottomsheet implementation
+version: 0.1.2
 author: Mattia Crovero <mcrovero@gmail.com>
 homepage: https://github.com/mcrovero/rubber
 
