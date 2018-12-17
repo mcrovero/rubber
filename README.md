@@ -11,4 +11,5 @@ Follow the [Quick Start](https://github.com/mcrovero/rubber/wiki/Quick-start) to
     <td><img src="https://github.com/mcrovero/rubber/blob/master/assets/demo2.gif" width="250"></td>
   </tr>
 </table>
+
 Is available the complete [example](https://github.com/mcrovero/rubber/tree/master/example) to the project in the gifs.
