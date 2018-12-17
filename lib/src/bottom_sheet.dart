@@ -141,7 +141,6 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       }
     }
   }
-
 }
 
 class RubberBottomSheetScope extends InheritedWidget {
