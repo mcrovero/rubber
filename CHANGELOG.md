@@ -1,6 +1,6 @@
 ## [0.1.5] - 17/12/2018
 
-* Changed description and readme
+* Changed hide/show control and optimized
 
 ## [0.1.4] - 17/12/2018
 

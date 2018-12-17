@@ -416,11 +416,7 @@ class RubberAnimationController extends Animation<double>
   AnimationState _lastReportedState = AnimationState.collapsed;
   void _checkStateChanged() {
     _checkState();
-    print("$_lastReportedState $animationState");
-    if (_lastReportedState != animationState) {
-      _lastReportedState = animationState;
-      notifyStatusListeners(status);
-    }
+    _checkCurrentState();
   }
   void _checkCurrentState() {
     if (_lastReportedState != animationState) {
@@ -437,7 +433,6 @@ class RubberAnimationController extends Animation<double>
     if (_simulation.isDone(elapsedInSeconds)) {
       _status = AnimationStatus.completed;
       stop(canceled: false);
-      print("animation done");
       _checkStateChanged();
     }
     notifyListeners();
