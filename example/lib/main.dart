@@ -33,11 +33,11 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   @override
   void initState() {
     _controller = RubberAnimationController(
-        vsync: this,
-        lowerBound: 0.15,
-        halfBound: 0.5,
-        upperBound: 0.9,
-        duration: Duration(milliseconds: 200)
+      vsync: this,
+      lowerBound: 0.15,
+      halfBound: 0.5,
+      upperBound: 0.9,
+      duration: Duration(milliseconds: 200)
     );
     _controller.addStatusListener(_statusListener);
 
