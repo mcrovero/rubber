@@ -1,7 +1,6 @@
-# rubber
+# Rubber
 
-Simple yet powerful material bottomsheet implementation
+An elastic bottomsheet for Flutter.
+Follow the [Quick Start](https://github.com/mcrovero/rubber/wiki/Quick-start) to add it to your project.
 
-## Getting Started
-
-More on the [medium article](https://medium.com)
+![](https://github.com/mcrovero/rubber/assets/demo1.gif)
