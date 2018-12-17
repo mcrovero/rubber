@@ -7,8 +7,8 @@ Follow the [Quick Start](https://github.com/mcrovero/rubber/wiki/Quick-start) to
 
 <table>
   <tr>
-    <td><img src="https://github.com/mcrovero/rubber/blob/master/assets/demo1.gif" width="250"></td>
-    <td><img src="https://github.com/mcrovero/rubber/blob/master/assets/demo2.gif" width="250"></td>
+    <td><img src="https://github.com/mcrovero/rubber/raw/master/assets/demo1.gif" width="250"></td>
+    <td><img src="https://github.com/mcrovero/rubber/raw/master/assets/demo2.gif" width="250"></td>
   </tr>
 </table>
 
