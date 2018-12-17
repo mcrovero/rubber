@@ -12,4 +12,4 @@ Follow the [Quick Start](https://github.com/mcrovero/rubber/wiki/Quick-start) to
   </tr>
 </table>
 
-Is available the complete [example](https://github.com/mcrovero/rubber/tree/master/example) to the project in the gifs.
+Is available the [example](https://github.com/mcrovero/rubber/tree/master/example) in the repository to preview the library on your device.
