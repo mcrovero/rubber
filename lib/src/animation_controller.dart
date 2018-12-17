@@ -429,7 +429,7 @@ class RubberAnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
-    _value = _simulation.x(elapsedInSeconds);
+    _value = _simulation.x(elapsedInSeconds).clamp(0.0, 1.0);
     if (_simulation.isDone(elapsedInSeconds)) {
       _status = AnimationStatus.completed;
       stop(canceled: false);
