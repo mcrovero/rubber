@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
@@ -139,7 +141,7 @@ class RubberAnimationController extends Animation<double>
     stop();
     _internalSetValue(newValue);
     notifyListeners();
-    _checkStatusChanged();
+    _checkStateChanged();
   }
 
   /// Sets the controller's value to [lowerBound], stopping the animation (if
@@ -160,12 +162,12 @@ class RubberAnimationController extends Animation<double>
 
   void _internalSetValue(double newValue) {
     _value = newValue;
-    if (_value == lowerBound || _value == halfBound || _value == upperBound) {
+    if (_value == lowerBound || _value == halfBound || _value == upperBound || _value == 0) {
       _status = AnimationStatus.completed;
     } else {
       _status = AnimationStatus.forward;
     }
-    _checkStatusChanged();
+    _checkStateChanged();
   }
 
   /// The amount of time that has passed between the time the animation started
@@ -233,6 +235,14 @@ class RubberAnimationController extends Animation<double>
     return _animateToInternal(lowerBound);
   }
 
+  bool _visibility = true;
+  bool get visibility => _visibility;
+  set visibility(bool show) {
+    _visibility = show;
+    _checkCurrentState();
+    notifyStatusListeners(status);
+  }
+
   void _checkState() {
     if(nearZero(value - lowerBound, 0.1)) {
       animationState = AnimationState.collapsed;
@@ -284,7 +294,7 @@ class RubberAnimationController extends Animation<double>
         notifyListeners();
       }
       _status = AnimationStatus.completed;
-      _checkStatusChanged();
+      _checkStateChanged();
       return TickerFuture.complete();
     }
     assert(simulationDuration > Duration.zero);
@@ -292,32 +302,27 @@ class RubberAnimationController extends Animation<double>
     return _startSimulation(_InterpolationSimulation(_value, target, simulationDuration, curve, scale));
   }
 
-  final double launchSpeed = 7;
-  TickerFuture launchTo(double target) {
-    switch(animationState) {
+  double getBoundFromState(AnimationState state) {
+    switch(state) {
       case AnimationState.collapsed:
-        if(target == upperBound) {
-          return launch(lowerBound, upperBound, velocity: launchSpeed);
-        } else {
-          return launch(lowerBound, halfBound, velocity: launchSpeed);
-        }
-        break;
+        return lowerBound;
       case AnimationState.half_expanded:
-        if(target == upperBound) {
-          return launch(halfBound,upperBound,velocity: -launchSpeed);
-        } else {
-          return launch(lowerBound,halfBound,velocity: launchSpeed);
-        }
-        break;
+        return halfBound;
       case AnimationState.expanded:
-        if(target == halfBound) {
-          return launch(halfBound,upperBound,velocity: launchSpeed);
-        } else {
-          return launch(lowerBound,upperBound,velocity: launchSpeed);
-        }
-        break;
+        return upperBound;
     }
-    return null;
+    return 1.0;
+  }
+
+  final double launchSpeed = 7;
+  TickerFuture launchTo(AnimationState targetState) {
+    var targetBound = getBoundFromState(targetState);
+    var currentBound = getBoundFromState(animationState);
+    var direction = 0.0;
+    if((targetBound-currentBound) != 0) {
+      direction = (targetBound - currentBound) / (targetBound - currentBound);
+    }
+    return launch(min(targetBound,currentBound), max(targetBound,currentBound),velocity: launchSpeed*(direction));
   }
   TickerFuture launch(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
     final double target = velocity < 0.0 ? from : to;
@@ -332,8 +337,6 @@ class RubberAnimationController extends Animation<double>
           break;
       }
     }
-
-    print("value: $value");
     final Simulation simulation = RubberSpringSimulation(_springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
     return animateWith(simulation);
@@ -376,7 +379,7 @@ class RubberAnimationController extends Animation<double>
     _value = simulation.x(0.0);
     final TickerFuture result = _ticker.start();
     _status = AnimationStatus.forward;
-    _checkStatusChanged();
+    _checkStateChanged();
     return result;
   }
 
@@ -411,14 +414,18 @@ class RubberAnimationController extends Animation<double>
   }
 
   AnimationState _lastReportedState = AnimationState.collapsed;
-  //AnimationStatus _lastReportedStatus = AnimationStatus.dismissed;
-  void _checkStatusChanged() {
-    final AnimationStatus newStatus = status;
-    final AnimationState newState = animationState;
-    if (_lastReportedState != newState) {
-      _lastReportedState = newState;
-      _checkState();
-      notifyStatusListeners(newStatus);
+  void _checkStateChanged() {
+    _checkState();
+    print("$_lastReportedState $animationState");
+    if (_lastReportedState != animationState) {
+      _lastReportedState = animationState;
+      notifyStatusListeners(status);
+    }
+  }
+  void _checkCurrentState() {
+    if (_lastReportedState != animationState) {
+      _lastReportedState = animationState;
+      notifyStatusListeners(status);
     }
   }
 
@@ -430,7 +437,8 @@ class RubberAnimationController extends Animation<double>
     if (_simulation.isDone(elapsedInSeconds)) {
       _status = AnimationStatus.completed;
       stop(canceled: false);
-      _checkStatusChanged();
+      print("animation done");
+      _checkStateChanged();
     }
     notifyListeners();
 

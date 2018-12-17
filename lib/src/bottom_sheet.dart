@@ -28,18 +28,33 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   RubberAnimationController get _controller => widget.animationController;
 
-  ValueNotifier<bool> display = ValueNotifier(true);
   bool get halfState => _controller.halfBound != null;
 
   @override
   void initState() {
+    _controller.addStatusListener(_statusListener);
     super.initState();
   }
 
   @override
   void dispose() {
+    _controller.removeStatusListener(_statusListener);
     _controller.dispose();
     super.dispose();
+  }
+
+  bool _display = true;
+  void _statusListener(AnimationStatus status) {
+    if(_controller.visibility && _display) {
+      setState((){
+        _display = false;
+      });
+    }
+    if(!_controller.visibility && !_display){
+      setState((){
+        _display = true;
+      });
+    }
   }
 
   Widget _buildSlideAnimation(BuildContext context, Widget child) {
@@ -55,15 +70,15 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    screenHeight = screenSize.height;
+    var bottomSheet = GestureDetector(
+      child: widget.upperLayer,
+      onVerticalDragUpdate: _onVerticalDragUpdate,
+      onVerticalDragEnd: _onVerticalDragEnd,
+    );
     var elem;
-    if (display.value) {
-      final Size screenSize = MediaQuery.of(context).size;
-      screenHeight = screenSize.height;
-      var bottomSheet = GestureDetector(
-        child: widget.upperLayer,
-        onVerticalDragUpdate: _onVerticalDragUpdate,
-        onVerticalDragEnd: _onVerticalDragEnd,
-      );
+    if(_display) {
       elem = AnimatedBuilder(
         animation: _controller,
         builder: _buildSlideAnimation,
@@ -74,11 +89,13 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     }
     return RubberBottomSheetScope(
       animationController: _controller,
-      display: display,
       child: Stack(
         children: <Widget>[
           widget.lowerLayer,
-          Align(child: elem, alignment: Alignment.bottomRight)
+          Align(
+            child: elem,
+            alignment: Alignment.bottomRight
+          )
         ],
       )
     );
@@ -103,7 +120,6 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   void _onVerticalDragEnd(DragEndDetails details) {
     final double flingVelocity = -details.velocity.pixelsPerSecond.dy / screenHeight;
-    print("flingVelocity: $flingVelocity");
     if (details.velocity.pixelsPerSecond.dy.abs() > _kCompleteFlingVelocity) {
       _controller.fling(_controller.lowerBound, _controller.upperBound,
           velocity: flingVelocity);
@@ -141,15 +157,14 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       }
     }
   }
+
 }
 
 class RubberBottomSheetScope extends InheritedWidget {
-  final ValueNotifier<bool> display;
   final RubberAnimationController animationController;
 
   RubberBottomSheetScope({
     Key key,
-    @required this.display,
     @required this.animationController,
     @required Widget child,
   }) : super(key: key, child: child);
@@ -160,5 +175,5 @@ class RubberBottomSheetScope extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(RubberBottomSheetScope old) => display != old.display;
+  bool updateShouldNotify(RubberBottomSheetScope old) => true;
 }

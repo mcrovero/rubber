@@ -41,7 +41,7 @@ class RubberSpringSimulation extends Simulation {
     if(nearZero(_solution.x(time),0.0001))
       zeros++;
 
-    if(zeros >= 30) {
+    if(zeros >= 10) {
       stopTime = time;
       return true;
     }

@@ -16,9 +16,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  color: ^2.1.1
+  #color: ^2.1.1
 
-  rubber: ^0.1.3
+  rubber: #^0.1.4
+    path: ../
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

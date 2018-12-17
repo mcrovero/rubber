@@ -55,7 +55,10 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   }
 
   void _expand() {
-    _controller.launchTo(_controller.upperBound);
+    _controller.launchTo(AnimationState.expanded);
+  }
+  void _hide() {
+    _controller.visibility = !_controller.visibility;
   }
 
   @override
@@ -71,12 +74,25 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
           animationController: _controller,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _expand,
-        tooltip: 'Expand',
-        backgroundColor: Colors.cyan[900],
-        foregroundColor: Colors.cyan[400],
-        child: Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          FloatingActionButton(
+            onPressed: _hide,
+            backgroundColor: Colors.cyan[900],
+            foregroundColor: Colors.cyan[400],
+            child: Icon(Icons.visibility),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 20.0),
+            child: FloatingActionButton(
+              onPressed: _expand,
+              backgroundColor: Colors.cyan[900],
+              foregroundColor: Colors.cyan[400],
+              child: Icon(Icons.vertical_align_top),
+            ),
+          ),
+        ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
