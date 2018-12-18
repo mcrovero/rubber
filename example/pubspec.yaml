@@ -16,8 +16,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  rubber: ^0.1.7
-    #path: ../
+  after_layout: ^1.0.7
+
+  rubber: #^0.2.0
+    path: ../
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

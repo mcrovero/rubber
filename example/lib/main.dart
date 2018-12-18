@@ -1,10 +1,11 @@
+import 'package:example/default.dart';
+import 'package:example/menu.dart';
 import 'package:flutter/material.dart';
-
-import 'package:rubber/rubber.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -12,102 +13,51 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Colors.cyan,
       ),
-      home: MyHomePage(title: 'Rubber BottomSheet Demo'),
+      home: HomePage(title: "Home",),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+
+class HomePage extends StatefulWidget {
+  HomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
-
-  RubberAnimationController _controller;
-
-  @override
-  void initState() {
-    _controller = RubberAnimationController(
-      vsync: this,
-      lowerBound: 0.15,
-      halfBound: 0.5,
-      upperBound: 0.9,
-      duration: Duration(milliseconds: 200)
-    );
-    _controller.addStatusListener(_statusListener);
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.removeStatusListener(_statusListener);
-    super.dispose();
-  }
-
-  void _statusListener(AnimationStatus status) {
-    print("changed State ${_controller.animationState}");
-  }
-
-  void _expand() {
-    _controller.launchTo(AnimationState.expanded);
-  }
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title,style: TextStyle(color: Colors.cyan[900]),),
-      ),
-      body: Container(
-        child: RubberBottomSheet(
-          lowerLayer: _getLowerLayer(),
-          upperLayer: _getUpperLayer(),
-          animationController: _controller,
+        appBar: AppBar(
+          title: Text(widget.title,style: TextStyle(color: Colors.cyan[900]),),
         ),
-      ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          FloatingActionButton(
-            onPressed: () {
-              _controller.visibility = !_controller.visibility;
-            },
-            backgroundColor: Colors.cyan[900],
-            foregroundColor: Colors.cyan[400],
-            child: Icon(Icons.visibility),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 20.0),
-            child: FloatingActionButton(
-              onPressed: _expand,
-              backgroundColor: Colors.cyan[900],
-              foregroundColor: Colors.cyan[400],
-              child: Icon(Icons.vertical_align_top),
+        body: ListView(
+          children: <Widget>[
+            RaisedButton(
+              child: Text("Default"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DefaultPage()),
+                );
+              },
             ),
-          ),
-        ],
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-
-  Widget _getLowerLayer() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.cyan[100]
-      ),
-    );
-  }
-  Widget _getUpperLayer() {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.cyan
-      ),
+            RaisedButton(
+              child: Text("Menu"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MenuPage()),
+                );
+              },
+            ),
+          ],
+        ),
     );
   }
 }

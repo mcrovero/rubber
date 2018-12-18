@@ -1,3 +1,9 @@
+## [0.2.0] - 18/12/2018
+
+* Added dismissable parameter to the animation controller
+* Now it is possible to use pixel measures instead of percentages.
+* Added the menu example
+
 ## [0.1.7] - 17/12/2018
 
 * Fixed example and hiding

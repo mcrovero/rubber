@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:rubber/src/animation_controller.dart';
 
+import 'package:after_layout/after_layout.dart';
+
 const double _kMinFlingVelocity = 700.0;
 const double _kCompleteFlingVelocity = 5000.0;
 
@@ -11,12 +13,14 @@ class RubberBottomSheet extends StatefulWidget {
   const RubberBottomSheet({Key key,
     @required this.animationController,
     @required this.lowerLayer,
-    @required this.upperLayer})
+    @required this.upperLayer,
+    this.menuLayer})
       : assert(animationController!=null),
         super(key: key);
 
   final Widget lowerLayer;
   final Widget upperLayer;
+  final Widget menuLayer;
   final RubberAnimationController animationController;
 
   @override
@@ -24,7 +28,15 @@ class RubberBottomSheet extends StatefulWidget {
 
 }
 
-class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin {
+class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin, AfterLayoutMixin<RubberBottomSheet> {
+
+  // We keep track of this key to size the widget later on
+  final GlobalKey _keyMenu = GlobalKey(debugLabel: 'bottomsheet menu key');
+
+  double get _bottomSheetHeight {
+    final RenderBox renderBox = _keyMenu.currentContext.findRenderObject();
+    return renderBox.size.height;
+  }
 
   RubberAnimationController get _controller => widget.animationController;
 
@@ -32,30 +44,55 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   @override
   void initState() {
-    _controller.addStatusListener(_statusListener);
     super.initState();
+    _controller.visibility.addListener(_visibilityListener);
   }
 
   @override
   void dispose() {
-    _controller.removeStatusListener(_statusListener);
+    _controller.visibility.removeListener(_visibilityListener);
     _controller.dispose();
     super.dispose();
   }
 
   bool _display = true;
-  void _statusListener(AnimationStatus status) {
+  void _visibilityListener() {
     setState((){
-      _display = _controller.visibility;
+      _display = _controller.visibility.value;
     });
   }
 
   Widget _buildSlideAnimation(BuildContext context, Widget child) {
-    //print("child height : $_childHeight");
-    return Align(
-        alignment: AlignmentDirectional.topStart,
-        heightFactor: widget.animationController.value,
-        child: child
+    var layout;
+    if(widget.menuLayer != null) {
+      layout = Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: FractionallySizedBox(
+                heightFactor: widget.animationController.value,
+                child: child
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: widget.menuLayer
+          ),
+        ],
+      );
+    } else {
+      layout = Align(
+        alignment: Alignment.bottomLeft,
+        child: FractionallySizedBox(
+            heightFactor: widget.animationController.value,
+            child: child
+        ),
+      );
+    }
+    return GestureDetector(
+      onVerticalDragUpdate: _onVerticalDragUpdate,
+      onVerticalDragEnd: _onVerticalDragEnd,
+      child: layout,
     );
   }
 
@@ -63,13 +100,10 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
+
     final Size screenSize = MediaQuery.of(context).size;
     screenHeight = screenSize.height;
-    var bottomSheet = GestureDetector(
-      child: widget.upperLayer,
-      onVerticalDragUpdate: _onVerticalDragUpdate,
-      onVerticalDragEnd: _onVerticalDragEnd,
-    );
+    var bottomSheet = widget.upperLayer;
     var elem;
     if(_display) {
       elem = AnimatedBuilder(
@@ -83,17 +117,17 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     return RubberBottomSheetScope(
       animationController: _controller,
       child: Stack(
+        key: _keyMenu,
         children: <Widget>[
           widget.lowerLayer,
           Align(
             child: elem,
             alignment: Alignment.bottomRight
-          )
+          ),
         ],
       )
     );
   }
-
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     var friction = 1.0;
@@ -151,6 +185,10 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     }
   }
 
+  @override
+  void afterFirstLayout(BuildContext context) {
+    _controller.height = _bottomSheetHeight;
+  }
 }
 
 class RubberBottomSheetScope extends InheritedWidget {
