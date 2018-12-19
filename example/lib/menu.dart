@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
-
 class MenuPage extends StatefulWidget {
   MenuPage({Key key}) : super(key: key);
 

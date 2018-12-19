@@ -1,6 +1,6 @@
 # Rubber - The bottomsheet
 
-*An elastic material bottomsheet implementation for Flutter.*
+*An elastic material bottom sheet implementation for Flutter.*
 
 This is still an early preview, some behaviors can change or being removed. Every feedback, bug report or feature request is welcome, please send it at the [issue tracker](https://github.com/mcrovero/rubber/issues)
 
