@@ -1,4 +1,4 @@
-# Rubber - The bottomsheet
+<img src="https://github.com/mcrovero/rubber/raw/master/assets/rubber-logo-nopadding.jpg" width="500"/>
 
 *An elastic material bottom sheet implementation for Flutter.*
 
