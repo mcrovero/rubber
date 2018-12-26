@@ -1,3 +1,4 @@
+import 'package:example/spring.dart';
 import 'package:flutter/material.dart';
 import 'package:example/default.dart';
 import 'package:example/menu.dart';
@@ -53,6 +54,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => MenuPage()),
+                );
+              },
+            ),
+            RaisedButton(
+              child: Text("Spring settings"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SpringPage()),
                 );
               },
             ),

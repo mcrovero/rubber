@@ -1,3 +1,9 @@
+## [0.2.1] - 26/12/2018
+
+* Added some spring descriptions
+* Added new example to show spring settings
+* Fixed pixel size initial value
+
 ## [0.2.0] - 18/12/2018
 
 * Added dismissable parameter to the animation controller

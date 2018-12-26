@@ -39,12 +39,10 @@ class RubberSpringSimulation extends Simulation {
   @override
   bool isDone(double time) {
     if(dismissing) {
-      print("solution ${_solution.x(time)} $dismissing $_endPosition");
       if(_endPosition + _solution.x(time) <= _endPosition) return true;
       return false;
     }
     if(nearZero(_solution.x(time), 0.0001)) {
-      print("solution ${_solution.x(time)} $dismissing");
       zeros++;
     }
     if (zeros >= 10) {

@@ -5,15 +5,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
+import 'package:rubber/src/spring_description/damping_ratio.dart';
+import 'package:rubber/src/spring_description/stiffness.dart';
 import 'package:rubber/src/spring_simulation.dart';
 
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
+
 final SpringDescription _kFlingSpringDefaultDescription = SpringDescription.withDampingRatio(
-  mass: 1.5,
-  stiffness: 300.0,
-  ratio: 0.4,
+  mass: 1,
+  stiffness: Stiffness.LOW,
+  ratio: DampingRatio.LOW_BOUNCY,
 );
+
 
 const Tolerance _kFlingTolerance = Tolerance(
   velocity: double.infinity,
@@ -118,6 +122,9 @@ class RubberAnimationController extends Animation<double>
   final AnimationBehavior animationBehavior;
 
   SpringDescription _springDescription = _kFlingSpringDefaultDescription;
+  set springDescription(value) {
+    _springDescription = value;
+  }
 
   /// Returns an [Animation<double>] for this animation controller, so that a
   /// pointer to this object can be passed around without allowing users of that
@@ -176,6 +183,7 @@ class RubberAnimationController extends Animation<double>
     print("height: $value");
     if(lowerBoundValue.pixel != null) {
       lowerBoundValue.percentage = lowerBoundValue.pixel / value;
+      print("lowerbound: $lowerBound");
     }
     if(halfBoundValue!= null && halfBoundValue.pixel != null) {
       halfBoundValue.percentage = halfBoundValue.pixel / value;
@@ -183,6 +191,7 @@ class RubberAnimationController extends Animation<double>
     if(upperBoundValue.pixel != null) {
       upperBoundValue.percentage = upperBoundValue.pixel / value;
     }
+    _animateToInternal(lowerBound);
   }
 
   /// The rate of change of [value] per second.
@@ -463,7 +472,6 @@ class RubberAnimationController extends Animation<double>
   }
 
   void _tick(Duration elapsed) {
-    print("tick");
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
@@ -471,7 +479,6 @@ class RubberAnimationController extends Animation<double>
     if (_simulation.isDone(elapsedInSeconds)) {
       _status = AnimationStatus.completed;
       stop();
-      print("completed $_value");
       _checkStateChanged();
     }
     notifyListeners();
