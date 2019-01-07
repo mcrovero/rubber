@@ -1,3 +1,7 @@
+## [0.2.2] - 07/01/2019
+
+* Added scroll feature
+
 ## [0.2.1] - 26/12/2018
 
 * Added some spring descriptions
