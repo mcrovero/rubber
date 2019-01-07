@@ -9,7 +9,7 @@ Is also available the complete [example](https://github.com/mcrovero/rubber/tree
 <table>
   <tr>
     <td><img src="https://github.com/mcrovero/rubber/raw/master/assets/video1.gif" width="250"></td>
-    <td><img src="https://github.com/mcrovero/rubber/raw/master/assets/video2.gif" width="250"></td>
+    <td><img src="https://github.com/mcrovero/rubber/raw/master/assets/scroll1.gif" width="250"></td>
   </tr>
 </table>
 
