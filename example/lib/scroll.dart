@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class ScrollPage extends StatefulWidget {
+
   ScrollPage({Key key}) : super(key: key);
 
   @override
   _ScrollPageState createState() => _ScrollPageState();
+
 }
 
 class _ScrollPageState extends State<ScrollPage> with SingleTickerProviderStateMixin {
@@ -48,6 +50,7 @@ class _ScrollPageState extends State<ScrollPage> with SingleTickerProviderStateM
       ),
     );
   }
+
   Widget _getUpperLayer() {
     return Container(
       decoration: BoxDecoration(
@@ -57,9 +60,11 @@ class _ScrollPageState extends State<ScrollPage> with SingleTickerProviderStateM
         physics: NeverScrollableScrollPhysics(),
         controller: _scrollController,
         itemBuilder: (BuildContext context, int index) {
-        return ListTile(title: Text("Item $index"),);
-      },
-      itemCount: 100,),
+          return ListTile(title: Text("Item $index"),);
+        },
+        itemCount: 100
+      ),
     );
   }
+
 }
