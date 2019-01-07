@@ -45,32 +45,21 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   bool get halfState => _controller.halfBound != null;
 
-  bool _scrolling = true;
+  bool _scrolling = false;
 
   ScrollController get _scrollController => widget.scrollController;
-
-  AnimationController _scrollAnimationController;
-
 
   @override
   void initState() {
     super.initState();
-    _scrollAnimationController = AnimationController.unbounded(vsync: this)
-      ..addListener(_scrollAnimationListener);
     _controller.visibility.addListener(_visibilityListener);
   }
 
   @override
   void dispose() {
     _controller.visibility.removeListener(_visibilityListener);
-    _scrollAnimationController.removeListener(_scrollAnimationListener);
     _controller.dispose();
-    _scrollAnimationController.dispose();
     super.dispose();
-  }
-
-  void _scrollAnimationListener() {
-    print("animation value: ${_scrollAnimationController.value}");
   }
 
   bool _display = true;
@@ -162,10 +151,10 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     if(_scrolling) {
-      print(_scrollController.position.pixels);
-      _scrollController.position.jumpTo(_scrollController.position.pixels - details.primaryDelta);
+      // _drag might be null if the drag activity ended and called _disposeDrag.
+      assert(_hold == null || _drag == null);
+      _drag?.update(details);
       if(_scrollController.position.pixels <= 0) {
-        _scrollController.position.jumpTo(0.0);
         _setScrolling(false);
       }
     } else {

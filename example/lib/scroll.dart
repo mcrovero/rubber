@@ -54,7 +54,7 @@ class _ScrollPageState extends State<ScrollPage> with SingleTickerProviderStateM
           color: Colors.cyan
       ),
       child: ListView.builder(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: NeverScrollableScrollPhysics(),
         controller: _scrollController,
         itemBuilder: (BuildContext context, int index) {
         return ListTile(title: Text("test $index"),);
