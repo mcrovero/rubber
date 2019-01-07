@@ -91,7 +91,6 @@ class RubberAnimationController extends Animation<double>
     if(upperBoundValue == null){
       upperBoundValue = AnimationControllerValue(percentage: 0.9);
     }
-    print("lowerBound $lowerBound");
     _internalSetValue(value ?? lowerBound);
   }
 
@@ -180,10 +179,8 @@ class RubberAnimationController extends Animation<double>
   }
 
   set height(double value) {
-    print("height: $value");
     if(lowerBoundValue.pixel != null) {
       lowerBoundValue.percentage = lowerBoundValue.pixel / value;
-      print("lowerbound: $lowerBound");
     }
     if(halfBoundValue!= null && halfBoundValue.pixel != null) {
       halfBoundValue.percentage = halfBoundValue.pixel / value;

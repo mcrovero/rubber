@@ -1,3 +1,4 @@
+import 'package:example/scroll.dart';
 import 'package:example/spring.dart';
 import 'package:flutter/material.dart';
 import 'package:example/default.dart';
@@ -63,6 +64,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => SpringPage()),
+                );
+              },
+            ),
+            RaisedButton(
+              child: Text("Scrolling"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ScrollPage()),
                 );
               },
             ),
