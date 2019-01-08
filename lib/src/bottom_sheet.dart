@@ -45,6 +45,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   bool get halfState => _controller.halfBound != null;
 
+  bool get _shouldScroll => _scrollController != null;
   bool _scrolling = false;
 
   ScrollController get _scrollController => widget.scrollController;
@@ -179,7 +180,9 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   }
 
   _setScrolling(bool scroll) {
-    _scrolling = scroll;
+    if(_shouldScroll) {
+      _scrolling = scroll;
+    }
   }
 
   void _handleDragStart(DragStartDetails details) {
