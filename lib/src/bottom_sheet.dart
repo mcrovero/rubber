@@ -155,8 +155,11 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       // _drag might be null if the drag activity ended and called _disposeDrag.
       assert(_hold == null || _drag == null);
       _drag?.update(details);
-      if(_scrollController.position.pixels <= 0) {
+      if(_scrollController.position.pixels <= 0 && details.primaryDelta>0) {
         _setScrolling(false);
+        if(_scrollController.position.pixels != 0.0) {
+          _scrollController.position.setPixels(0.0);
+        }
       }
     } else {
       var friction = 1.0;
@@ -174,7 +177,14 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       _controller.value -= details.primaryDelta / screenHeight * friction;
 
       if(_controller.value >= _controller.upperBound) {
+        _controller.value = _controller.upperBound;
         _setScrolling(true);
+        var startDetails = DragStartDetails(sourceTimeStamp: details.sourceTimeStamp, globalPosition: details.globalPosition);
+        _hold = _scrollController.position.hold(_disposeHold);
+        _drag = _scrollController.position.drag(startDetails, _disposeDrag);
+      } else {
+        _disposeDrag();
+        _disposeHold();
       }
     }
   }
@@ -195,12 +205,9 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     assert(_hold == null);
   }
 
-  //ScrollPhysics _physics = BouncingScrollPhysics();
-
   void _onVerticalDragEnd(DragEndDetails details) {
     final double flingVelocity = -details.velocity.pixelsPerSecond.dy / screenHeight;
     if(_scrolling) {
-      print("flingVelocity: $flingVelocity");
       assert(_hold == null || _drag == null);
       _drag?.end(details);
       assert(_drag == null);
@@ -248,13 +255,15 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   }
 
   void _handleDragCancel() {
-    // _hold might be null if the drag started.
-    // _drag might be null if the drag activity ended and called _disposeDrag.
-    assert(_hold == null || _drag == null);
-    _hold?.cancel();
-    _drag?.cancel();
-    assert(_hold == null);
-    assert(_drag == null);
+    if(_scrolling) {
+      // _hold might be null if the drag started.
+      // _drag might be null if the drag activity ended and called _disposeDrag.
+      assert(_hold == null || _drag == null);
+      _hold?.cancel();
+      _drag?.cancel();
+      assert(_hold == null);
+      assert(_drag == null);
+    }
   }
 
   void _disposeHold() {

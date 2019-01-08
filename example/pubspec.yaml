@@ -18,7 +18,7 @@ dependencies:
 
   after_layout: ^1.0.7
 
-  rubber: #^0.2.3
+  rubber: #^0.2.4
     path: ../
 
   # The following adds the Cupertino Icons font to your application.
