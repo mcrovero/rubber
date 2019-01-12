@@ -16,7 +16,7 @@ class RubberBottomSheet extends StatefulWidget {
     @required this.lowerLayer,
     @required this.upperLayer,
     this.menuLayer,
-    this.scrollController})
+    this.scrollController, this.header})
       : assert(animationController!=null),
         super(key: key);
 
@@ -24,6 +24,13 @@ class RubberBottomSheet extends StatefulWidget {
   final Widget lowerLayer;
   final Widget upperLayer;
   final Widget menuLayer;
+
+  /// The widget on top of the rest of the bottom sheet.
+  /// Usually used to make a non-scrollable area
+  final Widget header;
+
+  /// Instance of [RubberAnimationController] that controls the bottom sheet
+  /// animation state
   final RubberAnimationController animationController;
 
   @override
@@ -33,11 +40,13 @@ class RubberBottomSheet extends StatefulWidget {
 
 class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin, AfterLayoutMixin<RubberBottomSheet> {
 
-  // We keep track of this key to size the widget later on
-  final GlobalKey _keyMenu = GlobalKey(debugLabel: 'bottomsheet menu key');
+  double screenHeight;
+
+  final GlobalKey _keyPeak = GlobalKey();
+  final GlobalKey _keyWidget = GlobalKey(debugLabel: 'bottomsheet menu key');
 
   double get _bottomSheetHeight {
-    final RenderBox renderBox = _keyMenu.currentContext.findRenderObject();
+    final RenderBox renderBox = _keyWidget.currentContext.findRenderObject();
     return renderBox.size.height;
   }
 
@@ -75,13 +84,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     if(widget.menuLayer != null) {
       layout = Stack(
         children: <Widget>[
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: FractionallySizedBox(
-                heightFactor: widget.animationController.value,
-                child: child
-            ),
-          ),
+          _buildAnimatedBottomsheetWidget(context,child),
           Align(
             alignment: Alignment.bottomLeft,
             child: widget.menuLayer
@@ -89,13 +92,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
         ],
       );
     } else {
-      layout = Align(
-        alignment: Alignment.bottomLeft,
-        child: FractionallySizedBox(
-            heightFactor: widget.animationController.value,
-            child: child
-        ),
-      );
+      layout = _buildAnimatedBottomsheetWidget(context,child);
     }
     return GestureDetector(
       onVerticalDragDown: _onVerticalDragDown,
@@ -106,15 +103,27 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       child: layout,
     );
   }
+  Widget _buildAnimatedBottomsheetWidget(BuildContext context, Widget child) {
+    return Align(
+      alignment: Alignment.bottomLeft,
+      child: FractionallySizedBox(
+        heightFactor: widget.animationController.value,
+        child: child
+      )
+    );
+  }
 
-  double screenHeight;
 
   @override
   Widget build(BuildContext context) {
 
     final Size screenSize = MediaQuery.of(context).size;
     screenHeight = screenSize.height;
-    var bottomSheet = widget.upperLayer;
+    var peak = Container(
+      key: _keyPeak,
+      child: widget.header,
+    );
+    var bottomSheet = Column(children: <Widget>[peak,Expanded(child: widget.upperLayer)]);
     var elem;
     if(_display) {
       elem = AnimatedBuilder(
@@ -128,7 +137,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     return RubberBottomSheetScope(
       animationController: _controller,
       child: Stack(
-        key: _keyMenu,
+        key: _keyWidget,
         children: <Widget>[
           widget.lowerLayer,
           Align(
@@ -150,13 +159,17 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     _hold = _scrollController.position.hold(_disposeHold);
   }
 
+  Offset _lastPosition;
+
   void _onVerticalDragUpdate(DragUpdateDetails details) {
+    _lastPosition = details.globalPosition;
     if(_scrolling) {
       // _drag might be null if the drag activity ended and called _disposeDrag.
       assert(_hold == null || _drag == null);
       _drag?.update(details);
       if(_scrollController.position.pixels <= 0 && details.primaryDelta>0) {
         _setScrolling(false);
+        _handleDragCancel();
         if(_scrollController.position.pixels != 0.0) {
           _scrollController.position.setPixels(0.0);
         }
@@ -176,15 +189,14 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
       _controller.value -= details.primaryDelta / screenHeight * friction;
 
-      if(_controller.value >= _controller.upperBound) {
+      if(_controller.value >= _controller.upperBound && !_draggingPeak(_lastPosition)) {
         _controller.value = _controller.upperBound;
         _setScrolling(true);
         var startDetails = DragStartDetails(sourceTimeStamp: details.sourceTimeStamp, globalPosition: details.globalPosition);
         _hold = _scrollController.position.hold(_disposeHold);
         _drag = _scrollController.position.drag(startDetails, _disposeDrag);
       } else {
-        _disposeDrag();
-        _disposeHold();
+        _handleDragCancel();
       }
     }
   }
@@ -255,15 +267,14 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   }
 
   void _handleDragCancel() {
-    if(_scrolling) {
-      // _hold might be null if the drag started.
-      // _drag might be null if the drag activity ended and called _disposeDrag.
-      assert(_hold == null || _drag == null);
-      _hold?.cancel();
-      _drag?.cancel();
-      assert(_hold == null);
-      assert(_drag == null);
-    }
+
+    // _hold might be null if the drag started.
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    assert(_hold == null || _drag == null);
+    _hold?.cancel();
+    _drag?.cancel();
+    assert(_hold == null);
+    assert(_drag == null);
   }
 
   void _disposeHold() {
@@ -277,6 +288,14 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   @override
   void afterFirstLayout(BuildContext context) {
     _controller.height = _bottomSheetHeight;
+  }
+
+  bool _draggingPeak(Offset globalPosition) {
+    final RenderBox renderBoxRed = _keyPeak.currentContext.findRenderObject();
+    final positionPeak = renderBoxRed.localToGlobal(Offset.zero);
+    final sizePeak = renderBoxRed.size;
+    final top = (sizePeak.height + positionPeak.dy);
+    return (globalPosition.dy < top);
   }
 }
 

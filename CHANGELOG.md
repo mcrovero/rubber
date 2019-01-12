@@ -1,3 +1,8 @@
+## [0.2.5] - 12/01/2019
+
+* Added header to help manage the bottom sheet with scrolling elements
+* Fixed gestures detector inside Scrollables
+
 ## [0.2.4] - 08/01/2019
 
 * IOS optimization
