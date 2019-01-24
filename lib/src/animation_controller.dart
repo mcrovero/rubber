@@ -356,7 +356,7 @@ class RubberAnimationController extends Animation<double>
   TickerFuture launchTo(AnimationState targetState) {
     final targetBound = getBoundFromState(targetState);
     final currentBound = getBoundFromState(animationState);
-    final direction = targetBound < currentBound ? -1.0 : targetBound > currentBound ? 1.0 : 0;
+    final direction = targetBound < currentBound ? -1.0 : targetBound > currentBound ? 1.0 : 0.0;
     return launch(min(targetBound,currentBound), max(targetBound,currentBound),velocity: launchSpeed*(direction));
   }
   TickerFuture launch(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
