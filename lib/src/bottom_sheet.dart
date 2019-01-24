@@ -154,9 +154,11 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   ScrollHoldController _hold;
 
   void _onVerticalDragDown(DragDownDetails details) {
-    assert(_drag == null);
-    assert(_hold == null);
-    _hold = _scrollController.position.hold(_disposeHold);
+    if(_shouldScroll) {
+      assert(_drag == null);
+      assert(_hold == null);
+      _hold = _scrollController.position.hold(_disposeHold);
+    }
   }
 
   Offset _lastPosition;
@@ -191,10 +193,12 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
       if(_controller.value >= _controller.upperBound && !_draggingPeak(_lastPosition)) {
         _controller.value = _controller.upperBound;
-        _setScrolling(true);
-        var startDetails = DragStartDetails(sourceTimeStamp: details.sourceTimeStamp, globalPosition: details.globalPosition);
-        _hold = _scrollController.position.hold(_disposeHold);
-        _drag = _scrollController.position.drag(startDetails, _disposeDrag);
+        if(_shouldScroll) {
+          _setScrolling(true);
+          var startDetails = DragStartDetails(sourceTimeStamp: details.sourceTimeStamp, globalPosition: details.globalPosition);
+          _hold = _scrollController.position.hold(_disposeHold);
+          _drag = _scrollController.position.drag(startDetails, _disposeDrag);
+        }
       } else {
         _handleDragCancel();
       }
@@ -208,13 +212,15 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   }
 
   void _handleDragStart(DragStartDetails details) {
-    // It's possible for _hold to become null between _handleDragDown and
-    // _handleDragStart, for example if some user code calls jumpTo or otherwise
-    // triggers a new activity to begin.
-    assert(_drag == null);
-    _drag = _scrollController.position.drag(details, _disposeDrag);
-    assert(_drag != null);
-    assert(_hold == null);
+    if(_shouldScroll) {
+      // It's possible for _hold to become null between _handleDragDown and
+      // _handleDragStart, for example if some user code calls jumpTo or otherwise
+      // triggers a new activity to begin.
+      assert(_drag == null);
+      _drag = _scrollController.position.drag(details, _disposeDrag);
+      assert(_drag != null);
+      assert(_hold == null);
+    }
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
