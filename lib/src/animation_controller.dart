@@ -361,7 +361,7 @@ class RubberAnimationController extends Animation<double>
   }
   TickerFuture launch(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
     // no animation necessary
-    if((to - from) * velocity <= 0)
+    if(to == from)
       return TickerFuture.complete();
     final double target = velocity < 0.0 ? from : to;
     double scale = 1.0;
