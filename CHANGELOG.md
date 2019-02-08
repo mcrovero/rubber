@@ -1,7 +1,13 @@
+## [0.2.6] - 12/01/2019
+
+* Fixed height factor < 0 crash
+* Fixed exception if not using a scroll controller
+* Improved stability to the launchTo animation
+
 ## [0.2.5] - 12/01/2019
 
 * Added header to help manage the bottom sheet with scrolling elements
-* Fixed gestures detector inside Scrollables
+* Fixed gestures detector inside Scrollable
 
 ## [0.2.4] - 08/01/2019
 
