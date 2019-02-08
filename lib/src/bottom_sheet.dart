@@ -107,7 +107,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     return Align(
       alignment: Alignment.bottomLeft,
       child: FractionallySizedBox(
-        heightFactor: widget.animationController.value,
+        heightFactor: widget.animationController.value >= 0 ? widget.animationController.value : 0,
         child: child
       )
     );
