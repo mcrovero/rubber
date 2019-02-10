@@ -202,7 +202,7 @@ class RubberAnimationController extends Animation<double>
   }
 
   void _internalSetValue(double newValue) {
-    _value = newValue;
+    _value = newValue.clamp(lowerBound, upperBound);
     if (_value == lowerBound || _value == halfBound || _value == upperBound || _value == 0) {
       _status = AnimationStatus.completed;
     } else {
