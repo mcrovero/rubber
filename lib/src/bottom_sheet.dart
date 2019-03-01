@@ -155,7 +155,6 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   void _onVerticalDragDown(DragDownDetails details) {
     if(_shouldScroll) {
-      assert(_drag == null);
       assert(_hold == null);
       _hold = _scrollController.position.hold(_disposeHold);
     }
