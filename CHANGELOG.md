@@ -1,3 +1,8 @@
+## [0.2.7] - 15/03/2019
+
+* Changed "value" parameter name to "initialValue" in RubberAnimationController
+* Added dismiss() method
+
 ## [0.2.6] - 12/01/2019
 
 * Fixed height factor < 0 crash

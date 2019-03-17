@@ -35,7 +35,7 @@ class _DefaultPageState extends State<DefaultPage> with SingleTickerProviderStat
   }
 
   void _expand() {
-    _controller.launchTo(AnimationState.expanded);
+    _controller.expand();
   }
 
   @override

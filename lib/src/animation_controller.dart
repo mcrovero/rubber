@@ -27,7 +27,8 @@ const Tolerance _kFlingTolerance = Tolerance(
 enum AnimationState {
   expanded,
   half_expanded,
-  collapsed
+  collapsed,
+  dismissed
 }
 
 class AnimationControllerValue {
@@ -76,7 +77,7 @@ class RubberAnimationController extends Animation<double>
     this.halfBoundValue,
     this.upperBoundValue,
     this.dismissable = false,
-    double value,
+    double initialValue,
     this.duration,
     this.debugLabel,
     this.animationBehavior = AnimationBehavior.normal,
@@ -91,7 +92,7 @@ class RubberAnimationController extends Animation<double>
     if(upperBoundValue == null){
       upperBoundValue = AnimationControllerValue(percentage: 0.9);
     }
-    _internalSetValue(value ?? lowerBound);
+    _internalSetValue(initialValue ?? lowerBound);
   }
 
   /// The value at which this animation is collapsed.
@@ -188,7 +189,7 @@ class RubberAnimationController extends Animation<double>
     if(upperBoundValue.pixel != null) {
       upperBoundValue.percentage = upperBoundValue.pixel / value;
     }
-    _animateToInternal(lowerBound);
+    _animateToInternal(_value);
   }
 
   /// The rate of change of [value] per second.
@@ -202,8 +203,9 @@ class RubberAnimationController extends Animation<double>
   }
 
   void _internalSetValue(double newValue) {
+    print("newValue: $newValue");
     _value = newValue;
-    if (_value == lowerBound || _value == halfBound || _value == upperBound || _value == 0) {
+    if (_value == lowerBound || _value == halfBound || _value == upperBound || _value == 0.0) {
       _status = AnimationStatus.completed;
     } else {
       _status = AnimationStatus.forward;
@@ -275,6 +277,21 @@ class RubberAnimationController extends Animation<double>
       value = from;
     return _animateToInternal(lowerBound);
   }
+  TickerFuture dismiss({ double from }) {
+    assert(() {
+      if (duration == null) {
+        throw FlutterError(
+            'AnimationController.reverse() called with no default Duration.\n'
+                'The "duration" property should be set, either in the constructor or later, before '
+                'calling the reverse() function.'
+        );
+      }
+      return true;
+    }());
+    if (from != null)
+      value = from;
+    return _animateToInternal(0.0);
+  }
 
   ValueNotifier<bool> visibility = ValueNotifier(true);
   void setVisibility(bool show) {
@@ -290,6 +307,9 @@ class RubberAnimationController extends Animation<double>
     }
     else if(nearZero(value - upperBound, 0.1)) {
       animationState = AnimationState.expanded;
+    } 
+    else if(nearZero(value, 0.1)) {
+      animationState = AnimationState.dismissed;
     }
   }
 
