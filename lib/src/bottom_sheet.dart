@@ -164,7 +164,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     _lastPosition = details.globalPosition;
-    if(_scrolling) {
+    if(_scrolling && _shouldScroll) {
       // _drag might be null if the drag activity ended and called _disposeDrag.
       assert(_hold == null || _drag == null);
       _drag?.update(details);
@@ -190,14 +190,14 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
       _controller.value -= details.primaryDelta / screenHeight * friction;
 
-      if(_controller.value >= _controller.upperBound && !_draggingPeak(_lastPosition)) {
+      if(_shouldScroll && _controller.value >= _controller.upperBound && !_draggingPeak(_lastPosition)) {
         _controller.value = _controller.upperBound;
-        if(_shouldScroll) {
-          _setScrolling(true);
-          var startDetails = DragStartDetails(sourceTimeStamp: details.sourceTimeStamp, globalPosition: details.globalPosition);
-          _hold = _scrollController.position.hold(_disposeHold);
-          _drag = _scrollController.position.drag(startDetails, _disposeDrag);
-        }
+        
+        _setScrolling(true);
+        var startDetails = DragStartDetails(sourceTimeStamp: details.sourceTimeStamp, globalPosition: details.globalPosition);
+        _hold = _scrollController.position.hold(_disposeHold);
+        _drag = _scrollController.position.drag(startDetails, _disposeDrag);
+      
       } else {
         _handleDragCancel();
       }
@@ -259,8 +259,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
             _controller.fling(_controller.lowerBound, _controller.upperBound,
                 velocity: flingVelocity);
           } else {
-            if (_controller.value >
-                (_controller.upperBound - _controller.lowerBound) / 2) {
+            if (_controller.value > (_controller.upperBound - _controller.lowerBound) / 2) {
               _controller.expand();
             } else {
               _controller.collapse();
@@ -292,7 +291,9 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   @override
   void afterFirstLayout(BuildContext context) {
-    _controller.height = _bottomSheetHeight;
+    setState(() {
+        _controller.height = _bottomSheetHeight;
+    });
   }
 
   bool _draggingPeak(Offset globalPosition) {

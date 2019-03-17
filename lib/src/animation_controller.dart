@@ -34,7 +34,7 @@ enum AnimationState {
 class AnimationControllerValue {
   double percentage;
   double pixel;
-  AnimationControllerValue({this.percentage = 0.0, this.pixel});
+  AnimationControllerValue({this.percentage, this.pixel});
   @override
   String toString() {
     return "percentace: $percentage pixel: $pixel";
@@ -77,7 +77,7 @@ class RubberAnimationController extends Animation<double>
     this.halfBoundValue,
     this.upperBoundValue,
     this.dismissable = false,
-    double initialValue,
+    this.initialValue,
     this.duration,
     this.debugLabel,
     this.animationBehavior = AnimationBehavior.normal,
@@ -92,7 +92,9 @@ class RubberAnimationController extends Animation<double>
     if(upperBoundValue == null){
       upperBoundValue = AnimationControllerValue(percentage: 0.9);
     }
-    _internalSetValue(initialValue ?? lowerBound);
+    if(initialValue != null || lowerBound != null) {
+      _internalSetValue(initialValue ?? lowerBound);
+    }
   }
 
   /// The value at which this animation is collapsed.
@@ -147,6 +149,7 @@ class RubberAnimationController extends Animation<double>
 
   AnimationState animationState;
 
+  double initialValue;
   /// The current value of the animation.
   ///
   /// Setting this value notifies all the listeners that the value
@@ -157,7 +160,7 @@ class RubberAnimationController extends Animation<double>
   /// listeners.
   @override
   double get value => _value;
-  double _value;
+  double _value = 0.0;
   /// Stops the animation controller and sets the current value of the
   /// animation.
   ///
@@ -176,10 +179,14 @@ class RubberAnimationController extends Animation<double>
   /// Sets the controller's value to [lowerBound], stopping the animation (if
   /// in progress), and resetting to its beginning point, or dismissed state.
   void reset() {
-    value = lowerBound;
+    value = 0.0;
   }
 
   set height(double value) {
+    // sets initial value if lowerbound has only pixel value
+    if(initialValue == null && lowerBound == null) {
+      _value = lowerBoundValue.pixel / value;
+    }
     if(lowerBoundValue.pixel != null) {
       lowerBoundValue.percentage = lowerBoundValue.pixel / value;
     }
@@ -189,7 +196,7 @@ class RubberAnimationController extends Animation<double>
     if(upperBoundValue.pixel != null) {
       upperBoundValue.percentage = upperBoundValue.pixel / value;
     }
-    _animateToInternal(_value);
+    value = _value;
   }
 
   /// The rate of change of [value] per second.
@@ -203,7 +210,6 @@ class RubberAnimationController extends Animation<double>
   }
 
   void _internalSetValue(double newValue) {
-    print("newValue: $newValue");
     _value = newValue;
     if (_value == lowerBound || _value == halfBound || _value == upperBound || _value == 0.0) {
       _status = AnimationStatus.completed;
@@ -368,6 +374,8 @@ class RubberAnimationController extends Animation<double>
         return halfBound;
       case AnimationState.expanded:
         return upperBound;
+      case AnimationState.dismissed:
+        return 0.0;
     }
     return 1.0;
   }
@@ -476,7 +484,7 @@ class RubberAnimationController extends Animation<double>
     super.dispose();
   }
 
-  AnimationState _lastReportedState = AnimationState.collapsed;
+  AnimationState _lastReportedState = AnimationState.dismissed;
   void _checkStateChanged() {
     _checkState();
     _checkCurrentState();

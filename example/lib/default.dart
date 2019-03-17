@@ -17,6 +17,7 @@ class _DefaultPageState extends State<DefaultPage> with SingleTickerProviderStat
     _controller = RubberAnimationController(
         vsync: this,
         halfBoundValue: AnimationControllerValue(percentage: 0.5),
+        lowerBoundValue: AnimationControllerValue(pixel: 200),
         duration: Duration(milliseconds: 200)
     );
     _controller.addStatusListener(_statusListener);
