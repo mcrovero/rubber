@@ -11,3 +11,5 @@ ios/.generated/
 ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.*
 
+# Visual Studio Code related
+.vscode/

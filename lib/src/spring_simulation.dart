@@ -27,7 +27,7 @@ class RubberSpringSimulation extends Simulation {
 
   @override
   double x(double time) {
-    if(nearZero(_solution.x(time),0.0001)) {
+    if(nearZero(_solution.x(time)-_endPosition,0.0001)) {
       return _endPosition;
     }
     return _endPosition + _solution.x(time);
@@ -42,7 +42,7 @@ class RubberSpringSimulation extends Simulation {
       if(_endPosition + _solution.x(time) <= _endPosition) return true;
       return false;
     }
-    if(nearZero(_solution.x(time), 0.0001)) {
+    if(nearZero(_solution.x(time)-_endPosition, 0.0001)) {
       zeros++;
     }
     if (zeros >= 10) {

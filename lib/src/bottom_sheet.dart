@@ -113,7 +113,6 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
 
@@ -271,7 +270,6 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   }
 
   void _handleDragCancel() {
-
     // _hold might be null if the drag started.
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);

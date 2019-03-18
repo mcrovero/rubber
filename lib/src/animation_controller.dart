@@ -354,7 +354,7 @@ class RubberAnimationController extends Animation<double>
     stop();
     if (simulationDuration == Duration.zero) {
       if (value != target) {
-        _value = target.clamp(lowerBound, upperBound);
+        _value = target;//.clamp(lowerBound, upperBound);
         notifyListeners();
       }
       _status = AnimationStatus.completed;
@@ -500,7 +500,7 @@ class RubberAnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
-    _value = _simulation.x(elapsedInSeconds).clamp(0.0, 1.0);
+    _value = _simulation.x(elapsedInSeconds);//.clamp(0.0, 1.0);
     if (_simulation.isDone(elapsedInSeconds)) {
       _status = AnimationStatus.completed;
       stop();
@@ -534,11 +534,6 @@ class _InterpolationSimulation extends Simulation {
   @override
   double x(double timeInSeconds) {
     final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
-    if (t == 0.0)
-      return _begin;
-    else if (t == 1.0)
-      return _end;
-    else
       return _begin + (_end - _begin) * _curve.transform(t);
   }
 
