@@ -1,5 +1,9 @@
 ## [0.2.7] - 15/03/2019
 
+* Optimized status updates
+
+## [0.2.7] - 15/03/2019
+
 * Changed "value" parameter name to "initialValue" in RubberAnimationController
 * Added dismiss() method
 

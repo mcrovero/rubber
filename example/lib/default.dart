@@ -21,18 +21,23 @@ class _DefaultPageState extends State<DefaultPage> with SingleTickerProviderStat
         duration: Duration(milliseconds: 200)
     );
     _controller.addStatusListener(_statusListener);
-
+    _controller.animationState.addListener(_stateListener);
     super.initState();
   }
 
   @override
   void dispose() {
     _controller.removeStatusListener(_statusListener);
+    _controller.animationState.removeListener(_stateListener);
     super.dispose();
   }
 
+  void _stateListener() {
+    print("state changed ${_controller.animationState.value}");
+  }
+
   void _statusListener(AnimationStatus status) {
-    print("changed State ${_controller.animationState}");
+    print("changed status ${_controller.status}");
   }
 
   void _expand() {

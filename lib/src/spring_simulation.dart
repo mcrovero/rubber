@@ -38,19 +38,9 @@ class RubberSpringSimulation extends Simulation {
 
   @override
   bool isDone(double time) {
-    if(dismissing) {
-      if(_endPosition + _solution.x(time) <= _endPosition) return true;
-      return false;
-    }
-    if(nearZero(_solution.x(time)-_endPosition, 0.0001)) {
-      zeros++;
-    }
-    if (zeros >= 10) {
-      return true;
-    }
-    return false;
+    return nearZero(_solution.x(time), tolerance.distance) && nearZero(_solution.dx(time), tolerance.velocity);
   }
-
+  
   @override
   String toString() => '$runtimeType(end: $_endPosition)';
 }
