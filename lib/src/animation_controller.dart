@@ -238,9 +238,10 @@ class RubberAnimationController extends Animation<double>
   /// to pass. See [Ticker.muted] and [TickerMode].
   bool get isAnimating => _ticker != null && _ticker.isActive;
 
+  /// Tells if the animations is running(forward) or completed 
   @override
   AnimationStatus get status => _status;
-  AnimationStatus _status;
+  AnimationStatus _status = AnimationStatus.completed;
 
   TickerFuture expand({ double from }) {
     assert(() {
