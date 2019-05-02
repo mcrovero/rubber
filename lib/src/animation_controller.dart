@@ -7,7 +7,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:rubber/src/spring_description/damping_ratio.dart';
 import 'package:rubber/src/spring_description/stiffness.dart';
-import 'package:rubber/src/spring_simulation.dart';
 
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
@@ -186,21 +185,27 @@ class RubberAnimationController extends Animation<double>
     value = 0.0;
   }
 
+  double _height=0.0;
   set height(double value) {
+    _height = value;
+    pixelValuesToPercentage();
+    value = _value;
+  }
+
+  void pixelValuesToPercentage() {
     // sets initial value if lowerbound has only pixel value
     if(initialValue == null && lowerBound == null) {
-      _value = lowerBoundValue.pixel / value;
+      _value = lowerBoundValue.pixel / _height;
     }
     if(lowerBoundValue.pixel != null) {
-      lowerBoundValue.percentage = lowerBoundValue.pixel / value;
+      lowerBoundValue.percentage = lowerBoundValue.pixel / _height;
     }
     if(halfBoundValue!= null && halfBoundValue.pixel != null) {
-      halfBoundValue.percentage = halfBoundValue.pixel / value;
+      halfBoundValue.percentage = halfBoundValue.pixel / _height;
     }
     if(upperBoundValue.pixel != null) {
-      upperBoundValue.percentage = upperBoundValue.pixel / value;
+      upperBoundValue.percentage = upperBoundValue.pixel / _height;
     }
-    value = _value;
   }
 
   /// The rate of change of [value] per second.
