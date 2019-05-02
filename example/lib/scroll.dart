@@ -36,6 +36,10 @@ class _ScrollPageState extends State<ScrollPage> with SingleTickerProviderStateM
         child: RubberBottomSheet(
           scrollController: _scrollController,
           lowerLayer: _getLowerLayer(),
+          header: Container(
+            color: Colors.yellow,
+          ),
+          headerHeight: 60,
           upperLayer: _getUpperLayer(),
           animationController: _controller,
         ),

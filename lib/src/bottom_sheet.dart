@@ -16,7 +16,7 @@ class RubberBottomSheet extends StatefulWidget {
     @required this.lowerLayer,
     @required this.upperLayer,
     this.menuLayer,
-    this.scrollController, this.header})
+    this.scrollController, this.header, this.headerHeight=50.0})
       : assert(animationController!=null),
         super(key: key);
 
@@ -28,6 +28,8 @@ class RubberBottomSheet extends StatefulWidget {
   /// The widget on top of the rest of the bottom sheet.
   /// Usually used to make a non-scrollable area
   final Widget header;
+  // Parameter to change the header height, it's the only way to set the header height
+  final double headerHeight;
 
   /// Instance of [RubberAnimationController] that controls the bottom sheet
   /// animation state
@@ -115,14 +117,20 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-
     final Size screenSize = MediaQuery.of(context).size;
     screenHeight = screenSize.height;
     var peak = Container(
       key: _keyPeak,
+      height: widget.headerHeight,
       child: widget.header,
     );
-    var bottomSheet = Column(children: <Widget>[peak,Expanded(child: widget.upperLayer)]);
+    var bottomSheet = Stack(children: <Widget>[
+      peak,
+      Container(
+        margin: EdgeInsets.only(top:widget.headerHeight),
+        child: widget.upperLayer
+      )
+    ]);
     var elem;
     if(_display) {
       elem = AnimatedBuilder(

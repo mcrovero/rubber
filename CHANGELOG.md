@@ -1,6 +1,8 @@
-## [0.2.7] - 15/03/2019
+## [0.2.8] - 02/05/2019
 
 * Optimized status updates
+* Fixed heder overflow, now parameters header and headerHeight are needed
+* Improved stability
 
 ## [0.2.7] - 15/03/2019
 
