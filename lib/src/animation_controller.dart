@@ -418,8 +418,8 @@ class RubberAnimationController extends Animation<double>
           break;
       }
     }
-    var dismissing = false;
-    if(target == lowerBound && dismissable) dismissing = true;
+    /*var dismissing = false;
+    if(target == lowerBound && dismissable) dismissing = true;*/
 
     final Simulation simulation = SpringSimulation(_springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
@@ -441,8 +441,8 @@ class RubberAnimationController extends Animation<double>
       }
     }
 
-    var dismissing = false;
-    if(target == lowerBound && dismissable) dismissing = true;
+    /*var dismissing = false;
+    if(target == lowerBound && dismissable) dismissing = true;*/
     final Simulation simulation = SpringSimulation(_springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
     return animateWith(simulation);
