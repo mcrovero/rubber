@@ -1,3 +1,7 @@
+## [0.2.9] - 04/05/2019
+
+* Fixed header height without header
+
 ## [0.2.8] - 02/05/2019
 
 * Optimized status updates
