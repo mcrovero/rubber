@@ -125,7 +125,7 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       child: widget.header,
     );
     var bottomSheet = Stack(children: <Widget>[
-      peak,
+      widget.header!=null ? peak : Container(),
       Container(
         margin: EdgeInsets.only(top:widget.headerHeight),
         child: widget.upperLayer
