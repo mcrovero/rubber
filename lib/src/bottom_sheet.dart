@@ -16,7 +16,7 @@ class RubberBottomSheet extends StatefulWidget {
     @required this.lowerLayer,
     @required this.upperLayer,
     this.menuLayer,
-    this.scrollController, this.header, this.headerHeight=50.0})
+    this.scrollController, this.header, this.headerHeight=50.0, this.dragFriction=0.52, this.onDragEnd})
       : assert(animationController!=null),
         super(key: key);
 
@@ -24,6 +24,8 @@ class RubberBottomSheet extends StatefulWidget {
   final Widget lowerLayer;
   final Widget upperLayer;
   final Widget menuLayer;
+  final double dragFriction;
+  final Function() onDragEnd;
 
   /// The widget on top of the rest of the bottom sheet.
   /// Usually used to make a non-scrollable area
@@ -59,7 +61,9 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   bool get _shouldScroll => _scrollController != null;
   bool _scrolling = false;
 
-  ScrollController get _scrollController => widget.scrollController;
+  /// Adding [substituteScrollController] a value the bottomsheet will change the default one
+  ScrollController substituteScrollController;
+  ScrollController get _scrollController => substituteScrollController ?? widget.scrollController;
 
   @override
   void initState() {
@@ -125,9 +129,9 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
       child: widget.header,
     );
     var bottomSheet = Stack(children: <Widget>[
-      widget.header!=null ? peak : Container(),
+      peak,
       Container(
-        margin: EdgeInsets.only(top:widget.headerHeight),
+        margin: EdgeInsets.only(top:widget.header != null ? widget.headerHeight : 0),
         child: widget.upperLayer
       )
     ]);
@@ -185,14 +189,19 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
     } else {
       var friction = 1.0;
       var diff;
+      // Friction if more than upper
       if (_controller.value > _controller.upperBound) {
         diff = _controller.value - _controller.upperBound;
       }
+      // Friction if less than lower
       else if (_controller.value < _controller.lowerBound) {
         diff = _controller.lowerBound - _controller.value;
       }
+      if(_controller.value < _controller.upperBound && _controller.dismissable && _controller.animationState.value == AnimationState.expanded) {
+        diff = _controller.upperBound - _controller.value;
+      }
       if (diff != null) {
-        friction = 0.52 * pow(1 - diff, 2);
+        friction = widget.dragFriction * pow(1 - diff, 2);
       }
 
       _controller.value -= details.primaryDelta / screenHeight * friction;
@@ -230,6 +239,8 @@ class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvid
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
+    if(widget.onDragEnd != null)
+      widget.onDragEnd();
     final double flingVelocity = -details.velocity.pixelsPerSecond.dy / screenHeight;
     if(_scrolling) {
       assert(_hold == null || _drag == null);

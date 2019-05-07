@@ -1,3 +1,10 @@
+## [0.3.0] - 04/05/2019
+
+* Added substituteScrollController to change the scrollController without setState()
+* Fixed issue headerHeight from last release
+* Improved dismissable functionalities
+* Added dragFriction to change the friction when scrolling over bounds
+
 ## [0.2.9] - 04/05/2019
 
 * Fixed header height without header

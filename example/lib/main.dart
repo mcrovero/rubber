@@ -1,3 +1,4 @@
+import 'package:example/dismissable.dart';
 import 'package:example/scroll.dart';
 import 'package:example/spring.dart';
 import 'package:flutter/material.dart';
@@ -73,6 +74,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ScrollPage()),
+                );
+              },
+            ),
+            RaisedButton(
+              child: Text("Dismissable"),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DismissablePage()),
                 );
               },
             ),

@@ -1,6 +1,6 @@
 name: rubber
 description: Rubber is an elastic bottom sheet widget with the customizable material spring animation.
-version: 0.2.9
+version: 0.3.0
 author: Mattia Crovero <mcrovero@gmail.com>
 homepage: https://github.com/mcrovero/rubber
 
