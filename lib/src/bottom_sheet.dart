@@ -25,6 +25,9 @@ class RubberBottomSheet extends StatefulWidget {
   final Widget upperLayer;
   final Widget menuLayer;
   final double dragFriction;
+
+  /// Called when the user stops scrolling, if this function returns a false the bottomsheet 
+  /// won't complete the nect onDragEnd instructions
   final Function() onDragEnd;
 
   /// The widget on top of the rest of the bottom sheet.
@@ -239,8 +242,12 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
-    if(widget.onDragEnd != null)
-      widget.onDragEnd();
+    // If onDragEnd returns a false value the method interrupts
+    if(widget.onDragEnd != null) {
+      var res = widget.onDragEnd();
+      if(res != null && !res) return;
+    }
+      
     final double flingVelocity = -details.velocity.pixelsPerSecond.dy / screenHeight;
     if(_scrolling) {
       assert(_hold == null || _drag == null);
