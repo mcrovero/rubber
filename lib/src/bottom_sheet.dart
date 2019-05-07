@@ -38,11 +38,11 @@ class RubberBottomSheet extends StatefulWidget {
   final RubberAnimationController animationController;
 
   @override
-  _RubberBottomSheetState createState() => _RubberBottomSheetState();
+  RubberBottomSheetState createState() => RubberBottomSheetState();
 
 }
 
-class _RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin, AfterLayoutMixin<RubberBottomSheet> {
+class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin, AfterLayoutMixin<RubberBottomSheet> {
 
   double screenHeight;
 
