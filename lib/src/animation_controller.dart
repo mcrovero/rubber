@@ -25,8 +25,7 @@ const Tolerance _kFlingTolerance = Tolerance(
 enum AnimationState {
   expanded,
   half_expanded,
-  collapsed,
-  dismissed
+  collapsed
 }
 
 class AnimationControllerValue {
@@ -81,7 +80,7 @@ class RubberAnimationController extends Animation<double>
     this.animationBehavior = AnimationBehavior.normal,
     springDescription,
     @required TickerProvider vsync,
-  }) : assert(vsync != null), assert(!dismissable || (dismissable && (lowerBoundValue==null && halfBoundValue==null))) {
+  }) : assert(vsync != null), assert(!dismissable || (dismissable && halfBoundValue==null)) {
     
     if(springDescription!=null) _springDescription = springDescription;
 
@@ -95,9 +94,8 @@ class RubberAnimationController extends Animation<double>
     if(upperBoundValue == null){
       upperBoundValue = AnimationControllerValue(percentage: 0.9);
     }
-    if(initialValue != null || lowerBound != null) {
+    if(lowerBound != null)
       _internalSetValue(initialValue ?? lowerBound);
-    }
   }
 
   /// The value at which this animation is collapsed.
@@ -112,6 +110,7 @@ class RubberAnimationController extends Animation<double>
   AnimationControllerValue upperBoundValue;
   double get upperBound => upperBoundValue.percentage;
 
+  /// Tells if the bottomsheet has to remain closed after drag down
   final bool dismissable;
 
   /// A label that is used in the [toString] output. Intended to aid with
@@ -181,10 +180,10 @@ class RubberAnimationController extends Animation<double>
     notifyListeners();
   }
   
-  /// Sets the controller's value to [lowerBound], stopping the animation (if
-  /// in progress), and resetting to its beginning point, or dismissed state.
+  /// Sets the controller's value to [initialValue] or [lowerBound], stopping the animation (if
+  /// in progress), and resetting to its beginning point, or collapsed state.
   void reset() {
-    value = 0.0;
+    value = initialValue ?? lowerBound;
   }
 
   double _height=0.0;
@@ -289,21 +288,6 @@ class RubberAnimationController extends Animation<double>
       value = from;
     return _animateToInternal(lowerBound);
   }
-  TickerFuture dismiss({ double from }) {
-    assert(() {
-      if (duration == null) {
-        throw FlutterError(
-            'AnimationController.dismiss() called with no default Duration.\n'
-                'The "duration" property should be set, either in the constructor or later, before '
-                'calling the dismiss() function.'
-        );
-      }
-      return true;
-    }());
-    if (from != null)
-      value = from;
-    return _animateToInternal(0.0);
-  }
 
   ValueNotifier<bool> visibility = ValueNotifier(true);
   void setVisibility(bool show) {
@@ -314,10 +298,11 @@ class RubberAnimationController extends Animation<double>
     var roundValue = double.parse(value.toStringAsFixed(2));
     var roundLowerBound = double.parse(lowerBound.toStringAsFixed(2));
     var roundHalfBound = 0.0;
-    if(halfBound != null) roundHalfBound = double.parse(halfBound.toStringAsFixed(2));
+    if(halfBound != null) 
+      roundHalfBound = double.parse(halfBound.toStringAsFixed(2));
     var roundUppperBound = double.parse(upperBound.toStringAsFixed(2));
 
-    if(roundValue == roundLowerBound && !dismissable) {
+    if(roundValue == roundLowerBound) {
       animationState.value = AnimationState.collapsed;
     }
     else if(halfBound != null && roundValue == roundHalfBound) {
@@ -325,9 +310,6 @@ class RubberAnimationController extends Animation<double>
     }
     else if(roundValue == roundUppperBound) {
       animationState.value = AnimationState.expanded;
-    } 
-    else if(roundValue == 0.0) {
-      animationState.value = AnimationState.dismissed;
     }
   }
 
@@ -386,8 +368,6 @@ class RubberAnimationController extends Animation<double>
         return halfBound;
       case AnimationState.expanded:
         return upperBound;
-      case AnimationState.dismissed:
-        return 0.0;
     }
     return 1.0;
   }
@@ -415,9 +395,6 @@ class RubberAnimationController extends Animation<double>
           break;
       }
     }
-    
-    /*var dismissing = false;
-    if(target == lowerBound && dismissable) dismissing = true;*/
 
     final Simulation simulation = SpringSimulation(_springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
@@ -438,9 +415,6 @@ class RubberAnimationController extends Animation<double>
           break;
       }
     }
-
-    /*var dismissing = false;
-    if(target == lowerBound && dismissable) dismissing = true;*/
     
     final Simulation simulation = SpringSimulation(_springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
@@ -502,9 +476,10 @@ class RubberAnimationController extends Animation<double>
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
     _value = _simulation.x(elapsedInSeconds);
-    if(_simulation.isDone(elapsedInSeconds) || (dismissable && _value<0.0)) {
-      if(_value<0.0) _value = 0.0;
-      print("done");
+    if(_simulation.isDone(elapsedInSeconds) || (dismissable && _value<lowerBound)) {
+      if(_value < lowerBound) 
+        _value = lowerBound;
+      
       _status = AnimationStatus.completed;
       notifyStatusListeners(_status);
       stop();
