@@ -81,13 +81,16 @@ class RubberAnimationController extends Animation<double>
     this.animationBehavior = AnimationBehavior.normal,
     springDescription,
     @required TickerProvider vsync,
-  }) : assert(vsync != null) {
+  }) : assert(vsync != null), assert(!dismissable || (dismissable && (lowerBoundValue==null && halfBoundValue==null))) {
     
     if(springDescription!=null) _springDescription = springDescription;
 
     _ticker = vsync.createTicker(_tick);
     if(lowerBoundValue == null){
-      lowerBoundValue = AnimationControllerValue(percentage: 0.1);
+      if(dismissable) 
+        lowerBoundValue = AnimationControllerValue(percentage: 0.0);
+      else 
+        lowerBoundValue = AnimationControllerValue(percentage: 0.1);
     }
     if(upperBoundValue == null){
       upperBoundValue = AnimationControllerValue(percentage: 0.9);
@@ -176,7 +179,6 @@ class RubberAnimationController extends Animation<double>
     stop();
     _internalSetValue(newValue);
     notifyListeners();
-    //_checkState();
   }
   
   /// Sets the controller's value to [lowerBound], stopping the animation (if
@@ -220,12 +222,6 @@ class RubberAnimationController extends Animation<double>
 
   void _internalSetValue(double newValue) {
     _value = newValue;
-    /*if (_value == lowerBound || _value == halfBound || _value == upperBound || _value == 0.0) {
-      _status = AnimationStatus.completed;
-    } else {
-      _status = AnimationStatus.forward;
-    }
-    _checkState();*/
   }
 
   /// The amount of time that has passed between the time the animation started
@@ -320,7 +316,8 @@ class RubberAnimationController extends Animation<double>
     var roundHalfBound = 0.0;
     if(halfBound != null) roundHalfBound = double.parse(halfBound.toStringAsFixed(2));
     var roundUppperBound = double.parse(upperBound.toStringAsFixed(2));
-    if(roundValue == roundLowerBound) {
+
+    if(roundValue == roundLowerBound && !dismissable) {
       animationState.value = AnimationState.collapsed;
     }
     else if(halfBound != null && roundValue == roundHalfBound) {
@@ -418,6 +415,7 @@ class RubberAnimationController extends Animation<double>
           break;
       }
     }
+    
     /*var dismissing = false;
     if(target == lowerBound && dismissable) dismissing = true;*/
 
@@ -443,6 +441,7 @@ class RubberAnimationController extends Animation<double>
 
     /*var dismissing = false;
     if(target == lowerBound && dismissable) dismissing = true;*/
+    
     final Simulation simulation = SpringSimulation(_springDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
     return animateWith(simulation);
@@ -503,7 +502,9 @@ class RubberAnimationController extends Animation<double>
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
     _value = _simulation.x(elapsedInSeconds);
-    if (_simulation.isDone(elapsedInSeconds)) {
+    if(_simulation.isDone(elapsedInSeconds) || (dismissable && _value<0.0)) {
+      if(_value<0.0) _value = 0.0;
+      print("done");
       _status = AnimationStatus.completed;
       notifyStatusListeners(_status);
       stop();

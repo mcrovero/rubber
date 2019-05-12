@@ -20,8 +20,8 @@ class _DismissablePageState extends State<DismissablePage> with SingleTickerProv
   void initState() {
     _controller = RubberAnimationController(
         vsync: this,
-        lowerBoundValue: AnimationControllerValue(percentage: 0.0),
-        upperBoundValue: AnimationControllerValue(percentage: 1),
+        //lowerBoundValue: AnimationControllerValue(percentage: 0.0),
+        upperBoundValue: AnimationControllerValue(percentage: 0.9),
         duration: Duration(milliseconds: 200),
         dismissable: true
     );
@@ -37,7 +37,6 @@ class _DismissablePageState extends State<DismissablePage> with SingleTickerProv
       body: Container(
         child: RubberBottomSheet(
           onDragEnd: (){
-            // If we want to dismiss with different rules
             print("onDragEnd");
           },
           scrollController: _scrollController,

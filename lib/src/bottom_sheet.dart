@@ -64,6 +64,8 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   bool get _shouldScroll => _scrollController != null;
   bool _scrolling = false;
 
+  bool get _hasHeader => widget.header != null;
+
   /// Adding [substituteScrollController] a value the bottomsheet will change the default one
   ScrollController substituteScrollController;
   ScrollController get _scrollController => substituteScrollController ?? widget.scrollController;
@@ -168,6 +170,13 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   ScrollHoldController _hold;
 
   void _onVerticalDragDown(DragDownDetails details) {
+    if(_hasHeader){
+      if(_draggingPeak(details.globalPosition)){
+        _setScrolling(false);
+      } else {
+        _setScrolling(true);
+      }
+    }
     if(_shouldScroll) {
       assert(_hold == null);
       _hold = _scrollController.position.hold(_disposeHold);
@@ -208,7 +217,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
       }
 
       _controller.value -= details.primaryDelta / screenHeight * friction;
-
+      print("dragging peak ${_draggingPeak(_lastPosition)}");
       if(_shouldScroll && _controller.value >= _controller.upperBound && !_draggingPeak(_lastPosition)) {
         _controller.value = _controller.upperBound;
         

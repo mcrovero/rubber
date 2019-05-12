@@ -1,9 +1,10 @@
 ## [0.3.0] - 04/05/2019
 
-* Added substituteScrollController to change the scrollController without setState()
-* Fixed issue headerHeight from last release
-* Improved dismissable functionalities
-* Added dragFriction to change the friction when scrolling over bounds
+* Added substituteScrollController to change the scrollController without setState().
+* Fixed issue headerHeight from last release.
+* Improved dismissable functionalities.
+* Added dragFriction to change the friction when scrolling over bounds.
+* Changed header behavior. If header is present it will be possible to drag up and down the bottomsheet only from the peak.
 
 ## [0.2.9] - 04/05/2019
 
