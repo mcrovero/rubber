@@ -244,36 +244,15 @@ class RubberAnimationController extends Animation<double>
   AnimationStatus _status = AnimationStatus.completed;
 
   TickerFuture expand({ double from }) {
-    assert(() {
-      if (duration == null) {
-        throw FlutterError(
-            'AnimationController.expand() called with no default Duration.\n'
-                'The "duration" property should be set, either in the constructor or later, before '
-                'calling the expand() function.'
-        );
-      }
-      return true;
-    }());
-    if (from != null)
-      value = from;
-    return _animateToInternal(upperBound);
+    return animateTo(from: from, to: upperBound);
   }
   TickerFuture halfExpand({ double from }) {
-    assert(() {
-      if (duration == null) {
-        throw FlutterError(
-            'AnimationController.halfExpand() called with no default Duration.\n'
-                'The "duration" property should be set, either in the constructor or later, before '
-                'calling the halfExpand() function.'
-        );
-      }
-      return true;
-    }());
-    if (from != null)
-      value = from;
-    return _animateToInternal(halfBound);
+    return animateTo(from: from, to: halfBound);
   }
   TickerFuture collapse({ double from }) {
+    return animateTo(from: from, to: lowerBound);
+  }
+  TickerFuture animateTo({ double from, double to }) { 
     assert(() {
       if (duration == null) {
         throw FlutterError(
@@ -286,7 +265,7 @@ class RubberAnimationController extends Animation<double>
     }());
     if (from != null)
       value = from;
-    return _animateToInternal(lowerBound);
+    return _animateToInternal(to);
   }
 
   ValueNotifier<bool> visibility = ValueNotifier(true);

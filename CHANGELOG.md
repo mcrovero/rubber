@@ -1,4 +1,8 @@
-## [0.3.1] - 04/05/2019
+## [0.3.2] - 12/05/2019
+
+* Added method to animate to a certain point animateTo({double from, double to}).
+
+## [0.3.1] - 12/05/2019
 
 * Added substituteScrollController to change the scrollController without setState().
 * Fixed issue headerHeight from last release.
