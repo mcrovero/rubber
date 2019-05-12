@@ -330,6 +330,8 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   }
 
   bool _draggingPeak(Offset globalPosition) {
+    if(!_hasHeader) 
+      return false;
     final RenderBox renderBoxRed = _keyPeak.currentContext.findRenderObject();
     final positionPeak = renderBoxRed.localToGlobal(Offset.zero);
     final sizePeak = renderBoxRed.size;
