@@ -1,6 +1,6 @@
 ## [0.3.2] - 12/05/2019
 
-* Added method to animate to a certain point animateTo({double from, double to}).
+* Added method to animate to a certain point animateTo({double from, double to}) and fixed launchTo.
 
 ## [0.3.1] - 12/05/2019
 

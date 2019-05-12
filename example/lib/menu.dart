@@ -24,9 +24,9 @@ class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin
     super.initState();
   }
 
-
   void _expand() {
-    _controller.launchTo(AnimationState.expanded);
+    print("expand");
+    _controller.launchTo(_controller.value,_controller.upperBound,velocity: 2);
   }
 
   @override

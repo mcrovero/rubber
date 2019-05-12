@@ -351,38 +351,13 @@ class RubberAnimationController extends Animation<double>
     return 1.0;
   }
 
-  final double launchSpeed = 7;
-  TickerFuture launchTo(AnimationState targetState) {
-    final targetBound = getBoundFromState(targetState);
-    final currentBound = getBoundFromState(animationState.value);
-    final direction = targetBound < currentBound ? -1.0 : 1.0;
-    return launch(min(targetBound,currentBound), max(targetBound,currentBound),velocity: launchSpeed*(direction));
-  }
-  TickerFuture launch(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
-    // no animation necessary
-    if(to == from)
-      return TickerFuture.complete();
-    final double target = velocity < 0.0 ? from : to;
-    double scale = 1.0;
-    final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
-    if (SemanticsBinding.instance.disableAnimations) {
-      switch (behavior) {
-        case AnimationBehavior.normal:
-          scale = 200.0;
-          break;
-        case AnimationBehavior.preserve:
-          break;
-      }
-    }
-
-    final Simulation simulation = SpringSimulation(_springDescription, value, target, velocity * scale)
-      ..tolerance = _kFlingTolerance;
-    return animateWith(simulation);
-  }
-
   TickerFuture fling(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
     final double target = velocity < 0.0 ? from : to;
+    return launchTo(value,target,velocity: velocity, animationBehavior: animationBehavior);
+  }
 
+  TickerFuture launchTo(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
+    print("launchTo from $from to $to at $velocity");
     double scale = 1.0;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     if (SemanticsBinding.instance.disableAnimations) {
@@ -395,7 +370,7 @@ class RubberAnimationController extends Animation<double>
       }
     }
     
-    final Simulation simulation = SpringSimulation(_springDescription, value, target, velocity * scale)
+    final Simulation simulation = SpringSimulation(_springDescription, from, to, velocity * scale)
       ..tolerance = _kFlingTolerance;
     return animateWith(simulation);
   }
@@ -455,7 +430,7 @@ class RubberAnimationController extends Animation<double>
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
     _value = _simulation.x(elapsedInSeconds);
-    if(_simulation.isDone(elapsedInSeconds) || (dismissable && _value<lowerBound)) {
+    if(_simulation.isDone(elapsedInSeconds) || (dismissable && _value<lowerBound && elapsedInSeconds > 0)) {
       if(_value < lowerBound) 
         _value = lowerBound;
       
