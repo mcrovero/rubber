@@ -293,7 +293,8 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
             _controller.fling(_controller.lowerBound, _controller.upperBound,
                 velocity: flingVelocity);
           } else {
-            if (_controller.value > (_controller.upperBound - _controller.lowerBound) / 2) {
+            print("${_controller.value} - ${_controller.upperBound} - ${_controller.lowerBound}");
+            if (_controller.value > (_controller.upperBound + _controller.lowerBound) / 2) {
               _controller.expand();
             } else {
               _controller.collapse();
