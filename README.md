@@ -1,5 +1,9 @@
 <img src="https://github.com/mcrovero/rubber/raw/master/assets/rubber-logo-nopadding.jpg" width="500"/>
 
+<a href="https://github.com/Solido/awesome-flutter">
+   <img alt="Awesome Flutter" src="https://img.shields.io/badge/Awesome-Flutter-blue.svg?longCache=true&style=flat-square" />
+</a>
+
 *An elastic material bottom sheet implementation for Flutter.*
 
 This is still an early preview, some behaviors can change or being removed. Every feedback, bug report or feature request is welcome, please send it at the [issue tracker](https://github.com/mcrovero/rubber/issues)
