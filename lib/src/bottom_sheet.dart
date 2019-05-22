@@ -16,7 +16,12 @@ class RubberBottomSheet extends StatefulWidget {
     @required this.lowerLayer,
     @required this.upperLayer,
     this.menuLayer,
-    this.scrollController, this.header, this.headerHeight=50.0, this.dragFriction=0.52, this.onDragEnd})
+    this.scrollController,
+    this.header,
+    this.headerHeight=50.0,
+    this.dragFriction=0.52,
+    this.onDragEnd,
+    this.onCollapse})
       : assert(animationController!=null),
         super(key: key);
 
@@ -25,6 +30,9 @@ class RubberBottomSheet extends StatefulWidget {
   final Widget upperLayer;
   final Widget menuLayer;
   final double dragFriction;
+
+  /// Called after the bottomsheet collapse
+  final Function() onCollapse;
 
   /// Called when the user stops scrolling, if this function returns a false the bottomsheet 
   /// won't complete the nect onDragEnd instructions
@@ -250,6 +258,14 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
     }
   }
 
+  void _collapse() {
+    _controller.collapse();
+
+    if (widget.onCollapse != null) {
+      widget.onCollapse();
+    }
+  }
+
   void _onVerticalDragEnd(DragEndDetails details) {
     // If onDragEnd returns a false value the method interrupts
     if(widget.onDragEnd != null) {
@@ -285,7 +301,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
                 (_controller.halfBound + _controller.lowerBound) / 2) {
               _controller.halfExpand();
             } else {
-              _controller.collapse();
+              _collapse();
             }
           }
         } else {
@@ -297,7 +313,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
             if (_controller.value > (_controller.upperBound + _controller.lowerBound) / 2) {
               _controller.expand();
             } else {
-              _controller.collapse();
+              _collapse();
             }
           }
         }
