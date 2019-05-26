@@ -74,6 +74,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   bool _forceScrolling = false;
   forceScroll(bool force) {
     _forceScrolling = force;
+    _setScrolling(force);
   }
 
   @override
