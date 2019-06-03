@@ -78,6 +78,13 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   ScrollController substituteScrollController;
   ScrollController get _scrollController => substituteScrollController ?? widget.scrollController;
 
+  /// If set true the drag won't move the bottomsheet but the scrolling will be always active
+  bool _forceScrolling = false;
+  forceScroll(bool force) {
+    _forceScrolling = force;
+    _setScrolling(force);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -184,7 +191,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
       } else {
         _setScrolling(true);
       }
-    }
+    } 
     if(_shouldScroll) {
       assert(_hold == null);
       _hold = _scrollController.position.hold(_disposeHold);
@@ -199,7 +206,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
       // _drag might be null if the drag activity ended and called _disposeDrag.
       assert(_hold == null || _drag == null);
       _drag?.update(details);
-      if(_scrollController.position.pixels <= 0 && details.primaryDelta>0) {
+      if(_scrollController.position.pixels <= 0 && details.primaryDelta>0 && !_forceScrolling) {
         _setScrolling(false);
         _handleDragCancel();
         if(_scrollController.position.pixels != 0.0) {
@@ -225,7 +232,6 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
       }
 
       _controller.value -= details.primaryDelta / screenHeight * friction;
-      print("dragging peak ${_draggingPeak(_lastPosition)}");
       if(_shouldScroll && _controller.value >= _controller.upperBound && !_draggingPeak(_lastPosition)) {
         _controller.value = _controller.upperBound;
         
@@ -293,12 +299,10 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
                   velocity: flingVelocity);
             }
           } else {
-            if (_controller.value >
-                (_controller.upperBound + _controller.halfBound) / 2) {
+            if (_controller.value > (_controller.upperBound + _controller.halfBound) / 2) {
               _controller.expand();
             }
-            else if (_controller.value >
-                (_controller.halfBound + _controller.lowerBound) / 2) {
+            else if (_controller.value > (_controller.halfBound + _controller.lowerBound) / 2) {
               _controller.halfExpand();
             } else {
               _collapse();
@@ -306,10 +310,8 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
           }
         } else {
           if (details.velocity.pixelsPerSecond.dy.abs() > _kMinFlingVelocity) {
-            _controller.fling(_controller.lowerBound, _controller.upperBound,
-                velocity: flingVelocity);
+            _controller.fling(_controller.lowerBound, _controller.upperBound, velocity: flingVelocity);
           } else {
-            print("${_controller.value} - ${_controller.upperBound} - ${_controller.lowerBound}");
             if (_controller.value > (_controller.upperBound + _controller.lowerBound) / 2) {
               _controller.expand();
             } else {
@@ -355,6 +357,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
     final top = (sizePeak.height + positionPeak.dy);
     return (globalPosition.dy < top);
   }
+
 }
 
 class RubberBottomSheetScope extends InheritedWidget {
