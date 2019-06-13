@@ -25,7 +25,8 @@ const Tolerance _kFlingTolerance = Tolerance(
 enum AnimationState {
   expanded,
   half_expanded,
-  collapsed
+  collapsed,
+  animating,
 }
 
 class AnimationControllerValue {
@@ -178,6 +179,7 @@ class RubberAnimationController extends Animation<double>
     stop();
     _internalSetValue(newValue);
     notifyListeners();
+    _checkState();
   }
   
   /// Sets the controller's value to [initialValue] or [lowerBound], stopping the animation (if
@@ -289,6 +291,8 @@ class RubberAnimationController extends Animation<double>
     }
     else if(roundValue == roundUppperBound) {
       animationState.value = AnimationState.expanded;
+    } else {
+      animationState.value = AnimationState.animating;
     }
   }
 
@@ -347,8 +351,10 @@ class RubberAnimationController extends Animation<double>
         return halfBound;
       case AnimationState.expanded:
         return upperBound;
+      case AnimationState.animating:
+        return null;
     }
-    return 1.0;
+    return 1;
   }
 
   TickerFuture fling(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
