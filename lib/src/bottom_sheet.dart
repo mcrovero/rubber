@@ -16,7 +16,12 @@ class RubberBottomSheet extends StatefulWidget {
     @required this.lowerLayer,
     @required this.upperLayer,
     this.menuLayer,
-    this.scrollController, this.header, this.headerHeight=50.0, this.dragFriction=0.52, this.onDragEnd})
+    this.scrollController, 
+    this.header, 
+    this.headerHeight=50.0, 
+    this.dragFriction=0.52, 
+    this.onDragEnd, 
+    this.enabled})
       : assert(animationController!=null),
         super(key: key);
 
@@ -25,6 +30,7 @@ class RubberBottomSheet extends StatefulWidget {
   final Widget upperLayer;
   final Widget menuLayer;
   final double dragFriction;
+  final bool enabled;
 
   /// Called when the user stops scrolling, if this function returns a false the bottomsheet 
   /// won't complete the nect onDragEnd instructions
@@ -113,11 +119,11 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
       layout = _buildAnimatedBottomsheetWidget(context,child);
     }
     return GestureDetector(
-      onVerticalDragDown: _onVerticalDragDown,
-      onVerticalDragUpdate: _onVerticalDragUpdate,
-      onVerticalDragEnd: _onVerticalDragEnd,
-      onVerticalDragCancel: _handleDragCancel,
-      onVerticalDragStart: _handleDragStart,
+      onVerticalDragDown: widget.enabled ? _onVerticalDragDown : null,
+      onVerticalDragUpdate:  widget.enabled ? _onVerticalDragUpdate : null,
+      onVerticalDragEnd: widget.enabled ? _onVerticalDragEnd : null,
+      onVerticalDragCancel: widget.enabled ? _handleDragCancel : null,
+      onVerticalDragStart: widget.enabled ? _handleDragStart : null,
       child: layout,
     );
   }

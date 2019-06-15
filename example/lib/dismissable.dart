@@ -19,11 +19,11 @@ class _DismissablePageState extends State<DismissablePage> with SingleTickerProv
   @override
   void initState() {
     _controller = RubberAnimationController(
-        vsync: this,
-        //lowerBoundValue: AnimationControllerValue(percentage: 0.0),
-        upperBoundValue: AnimationControllerValue(percentage: 0.9),
-        duration: Duration(milliseconds: 200),
-        dismissable: true
+      vsync: this,
+      //lowerBoundValue: AnimationControllerValue(percentage: 0.0),
+      upperBoundValue: AnimationControllerValue(percentage: 0.9),
+      duration: Duration(milliseconds: 200),
+      dismissable: true
     );
     super.initState();
   }
@@ -76,5 +76,4 @@ class _DismissablePageState extends State<DismissablePage> with SingleTickerProv
       ),
     );
   }
-
 }
