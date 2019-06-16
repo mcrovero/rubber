@@ -21,7 +21,7 @@ class RubberBottomSheet extends StatefulWidget {
     this.headerHeight=50.0, 
     this.dragFriction=0.52, 
     this.onDragEnd, 
-    this.enabled})
+    this.enabled = true})
       : assert(animationController!=null),
         super(key: key);
 
