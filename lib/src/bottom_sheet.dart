@@ -65,7 +65,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
 
   bool get halfState => _controller.halfBound != null;
 
-  bool get _shouldScroll => _scrollController != null;
+  bool get _shouldScroll => _scrollController != null && _scrollController.hasClients;
   bool _scrolling = false;
 
   bool get _hasHeader => widget.header != null;
