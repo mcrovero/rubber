@@ -363,7 +363,6 @@ class RubberAnimationController extends Animation<double>
   }
 
   TickerFuture launchTo(double from, double to, { double velocity = 1.0, AnimationBehavior animationBehavior }) {
-    print("launchTo from $from to $to at $velocity");
     double scale = 1.0;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     if (SemanticsBinding.instance.disableAnimations) {
