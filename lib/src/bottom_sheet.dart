@@ -20,7 +20,8 @@ class RubberBottomSheet extends StatefulWidget {
     this.header, 
     this.headerHeight=50.0, 
     this.dragFriction=0.52, 
-    this.onDragEnd})
+    this.onDragEnd, 
+    this.onTap})
       : assert(animationController!=null),
         super(key: key);
 
@@ -29,6 +30,7 @@ class RubberBottomSheet extends StatefulWidget {
   final Widget upperLayer;
   final Widget menuLayer;
   final double dragFriction;
+  final Function onTap;
 
   /// Called when the user stops scrolling, if this function returns a false the bottomsheet 
   /// won't complete the nect onDragEnd instructions
@@ -122,6 +124,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
       layout = _buildAnimatedBottomsheetWidget(context,child);
     }
     return GestureDetector(
+      onTap: widget.onTap,
       onVerticalDragDown: _onVerticalDragDown,
       onVerticalDragUpdate: _onVerticalDragUpdate,
       onVerticalDragEnd: _onVerticalDragEnd,
