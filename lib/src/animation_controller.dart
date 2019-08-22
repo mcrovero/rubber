@@ -254,7 +254,7 @@ class RubberAnimationController extends Animation<double>
   TickerFuture collapse({ double from }) {
     return animateTo(from: from, to: lowerBound);
   }
-  TickerFuture animateTo({ double from, double to }) { 
+  TickerFuture animateTo({ double from, double to, Curve curve = Curves.easeOut }) { 
     assert(() {
       if (duration == null) {
         throw FlutterError(
@@ -267,7 +267,7 @@ class RubberAnimationController extends Animation<double>
     }());
     if (from != null)
       value = from;
-    return _animateToInternal(to);
+    return _animateToInternal(to, curve: curve);
   }
 
   ValueNotifier<bool> visibility = ValueNotifier(true);
