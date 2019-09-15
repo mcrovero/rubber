@@ -182,18 +182,15 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
     } else {
       elem = Container();
     }
-    return RubberBottomSheetScope(
-      animationController: controller,
-      child: Stack(
-        key: _keyWidget,
-        children: <Widget>[
-          widget.lowerLayer,
-          Align(
-            child: elem,
-            alignment: Alignment.bottomRight
-          ),
-        ],
-      )
+    return Stack(
+      key: _keyWidget,
+      children: <Widget>[
+        widget.lowerLayer,
+        Align(
+          child: elem,
+          alignment: Alignment.bottomRight
+        ),
+      ],
     );
   }
 
@@ -375,22 +372,4 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
     return (globalPosition.dy < top);
   }
 
-}
-
-class RubberBottomSheetScope extends InheritedWidget {
-  final RubberAnimationController animationController;
-
-  RubberBottomSheetScope({
-    Key key,
-    @required this.animationController,
-    @required Widget child,
-  }) : super(key: key, child: child);
-
-
-  static RubberBottomSheetScope of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(RubberBottomSheetScope);
-  }
-
-  @override
-  bool updateShouldNotify(RubberBottomSheetScope old) => true;
 }

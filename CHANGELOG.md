@@ -1,3 +1,8 @@
+## [0.4.0] - 12/05/2019
+
+* BREAKING CHANGE : Removed RubberBottomSheetScope.of() InherithedWidget and moved to RubberBottomSheet.of()
+* Improved stability and removed logging
+
 ## [0.3.2] - 12/05/2019
 
 * Added method to animate to a certain point animateTo({double from, double to}) and fixed launchTo.
