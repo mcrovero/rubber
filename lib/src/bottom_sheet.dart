@@ -46,6 +46,19 @@ class RubberBottomSheet extends StatefulWidget {
   /// animation state
   final RubberAnimationController animationController;
 
+  static RubberBottomSheetState of(BuildContext context,
+      {bool nullOk = false}) {
+    assert(nullOk != null);
+    assert(context != null);
+    final RubberBottomSheetState result = context
+        .ancestorStateOfType(const TypeMatcher<RubberBottomSheetState>());
+    if (nullOk || result != null) return result;
+    throw FlutterError(
+        'RubberBottomSheet.of() called with a context that does not contain a RubberBottomSheet.\n'
+            'No RubberBottomSheet ancestor could be found starting from the context that was passed to RubberBottomSheet.of(). '
+            '  $context');
+  }
+
   @override
   RubberBottomSheetState createState() => RubberBottomSheetState();
 
@@ -53,7 +66,7 @@ class RubberBottomSheet extends StatefulWidget {
 
 class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProviderStateMixin, AfterLayoutMixin<RubberBottomSheet> {
 
-  double screenHeight;
+  double _screenHeight;
 
   final GlobalKey _keyPeak = GlobalKey();
   final GlobalKey _keyWidget = GlobalKey(debugLabel: 'bottomsheet menu key');
@@ -63,9 +76,9 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
     return renderBox.size.height;
   }
 
-  RubberAnimationController get _controller => widget.animationController;
+  RubberAnimationController get controller => widget.animationController;
 
-  bool get halfState => _controller.halfBound != null;
+  bool get halfState => controller.halfBound != null;
 
   bool get _shouldScroll => _scrollController != null && _scrollController.hasClients;
   bool _scrolling = false;
@@ -91,20 +104,20 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   @override
   void initState() {
     super.initState();
-    _controller.visibility.addListener(_visibilityListener);
+    controller.visibility.addListener(_visibilityListener);
   }
 
   @override
   void dispose() {
-    _controller.visibility.removeListener(_visibilityListener);
-    _controller.dispose();
+    controller.visibility.removeListener(_visibilityListener);
+    controller.dispose();
     super.dispose();
   }
 
   bool _display = true;
   void _visibilityListener() {
     setState((){
-      _display = _controller.visibility.value;
+      _display = controller.visibility.value;
     });
   }
 
@@ -146,7 +159,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    screenHeight = screenSize.height;
+    _screenHeight = screenSize.height;
     var peak = Container(
       key: _keyPeak,
       height: widget.headerHeight,
@@ -162,7 +175,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
     var elem;
     if(_display) {
       elem = AnimatedBuilder(
-        animation: _controller,
+        animation: controller,
         builder: _buildSlideAnimation,
         child: bottomSheet,
       );
@@ -170,7 +183,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
       elem = Container();
     }
     return RubberBottomSheetScope(
-      animationController: _controller,
+      animationController: controller,
       child: Stack(
         key: _keyWidget,
         children: <Widget>[
@@ -224,23 +237,23 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
         var friction = 1.0;
         var diff;
         // Friction if more than upper
-        if (_controller.value > _controller.upperBound) {
-          diff = _controller.value - _controller.upperBound;
+        if (controller.value > controller.upperBound) {
+          diff = controller.value - controller.upperBound;
         }
         // Friction if less than lower
-        else if (_controller.value < _controller.lowerBound) {
-          diff = _controller.lowerBound - _controller.value;
+        else if (controller.value < controller.lowerBound) {
+          diff = controller.lowerBound - controller.value;
         }
-        if(_controller.value < _controller.upperBound && _controller.dismissable && _controller.animationState.value == AnimationState.expanded) {
-          diff = _controller.upperBound - _controller.value;
+        if(controller.value < controller.upperBound && controller.dismissable && controller.animationState.value == AnimationState.expanded) {
+          diff = controller.upperBound - controller.value;
         }
         if (diff != null) {
           friction = widget.dragFriction * pow(1 - diff, 2);
         }
 
-        _controller.value -= details.primaryDelta / screenHeight * friction;
-        if(_shouldScroll && _controller.value >= _controller.upperBound && !_draggingPeak(_lastPosition)) {
-          _controller.value = _controller.upperBound;
+        controller.value -= details.primaryDelta / _screenHeight * friction;
+        if(_shouldScroll && controller.value >= controller.upperBound && !_draggingPeak(_lastPosition)) {
+          controller.value = controller.upperBound;
           
           _setScrolling(true);
           var startDetails = DragStartDetails(sourceTimeStamp: details.sourceTimeStamp, globalPosition: details.globalPosition);
@@ -282,43 +295,43 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
         if(res != null && !res) return;
       }
         
-      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / screenHeight;
+      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _screenHeight;
       if(_scrolling) {
         assert(_hold == null || _drag == null);
         _drag?.end(details);
         assert(_drag == null);
       } else {
         if (details.velocity.pixelsPerSecond.dy.abs() > _kCompleteFlingVelocity) {
-          _controller.fling(_controller.lowerBound, _controller.upperBound,
+          controller.fling(controller.lowerBound, controller.upperBound,
               velocity: flingVelocity);
         } else {
           if (halfState) {
             if (details.velocity.pixelsPerSecond.dy.abs() > _kMinFlingVelocity) {
-              if (_controller.value > _controller.halfBound) {
-                _controller.fling(_controller.halfBound, _controller.upperBound,
+              if (controller.value > controller.halfBound) {
+                controller.fling(controller.halfBound, controller.upperBound,
                     velocity: flingVelocity);
               } else {
-                _controller.fling(_controller.lowerBound, _controller.halfBound,
+                controller.fling(controller.lowerBound, controller.halfBound,
                     velocity: flingVelocity);
               }
             } else {
-              if (_controller.value > (_controller.upperBound + _controller.halfBound) / 2) {
-                _controller.expand();
+              if (controller.value > (controller.upperBound + controller.halfBound) / 2) {
+                controller.expand();
               }
-              else if (_controller.value > (_controller.halfBound + _controller.lowerBound) / 2) {
-                _controller.halfExpand();
+              else if (controller.value > (controller.halfBound + controller.lowerBound) / 2) {
+                controller.halfExpand();
               } else {
-                _controller.collapse();
+                controller.collapse();
               }
             }
           } else {
             if (details.velocity.pixelsPerSecond.dy.abs() > _kMinFlingVelocity) {
-              _controller.fling(_controller.lowerBound, _controller.upperBound, velocity: flingVelocity);
+              controller.fling(controller.lowerBound, controller.upperBound, velocity: flingVelocity);
             } else {
-              if (_controller.value > (_controller.upperBound + _controller.lowerBound) / 2) {
-                _controller.expand();
+              if (controller.value > (controller.upperBound + controller.lowerBound) / 2) {
+                controller.expand();
               } else {
-                _controller.collapse();
+                controller.collapse();
               }
             }
           }
@@ -348,7 +361,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
   @override
   void afterFirstLayout(BuildContext context) {
     setState(() {
-        _controller.height = _bottomSheetHeight;
+        controller.height = _bottomSheetHeight;
     });
   }
 
