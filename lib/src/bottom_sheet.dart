@@ -147,12 +147,11 @@ class RubberBottomSheetState extends State<RubberBottomSheet> with TickerProvide
     );
   }
   Widget _buildAnimatedBottomsheetWidget(BuildContext context, Widget child) {
-    return Align(
-      alignment: Alignment.bottomLeft,
-      child: FractionallySizedBox(
-        heightFactor: widget.animationController.value >= 0 ? widget.animationController.value : 0,
-        child: child
-      )
+    var heightFactor = widget.animationController.value >= 0 ? widget.animationController.value : 0.0;
+    return FractionallySizedBox(
+      alignment: Alignment.bottomCenter,
+      heightFactor: heightFactor,
+      child: child
     );
   }
 

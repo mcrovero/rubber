@@ -1,3 +1,7 @@
+## [0.4.1] - 28/10/2019
+
+* Fixed alignment issue
+
 ## [0.4.0] - 12/05/2019
 
 * BREAKING CHANGE : Removed RubberBottomSheetScope.of() InherithedWidget and moved to RubberBottomSheet.of()
