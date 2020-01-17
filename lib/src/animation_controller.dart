@@ -139,7 +139,7 @@ class RubberAnimationController extends Animation<double>
     }
     if (lowerBound != null) _internalSetValue(initialValue ?? lowerBound);
 
-    padding ??= AnimationPadding.fromPercentages(bottom: 0, top: 1);
+    padding ??= AnimationPadding.fromPercentages(bottom: 0, top: 0);
   }
 
   /// The value at which this animation is collapsed.
