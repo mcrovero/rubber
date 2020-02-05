@@ -56,10 +56,18 @@ class AnimationPadding {
       : top = value,
         bottom = value;
 
+  /// Pad with percent-distances from the top and bottom of the viewport
+  ///
+  /// i.e. `AnimationPadding.fromPercentages(bottom: 0, top: 0)` (the default)
+  /// only pads by the screen/viewport
   AnimationPadding.fromPercentages({double top, double bottom})
       : top = AnimationControllerValue(percentage: top),
         bottom = AnimationControllerValue(percentage: bottom);
 
+  /// No padding. Allows the bottom sheet to be flung offscreen
+  factory AnimationPadding.none() => AnimationPadding(top: null, bottom: null);
+
+  /// Pad with percent-distances from the bottom of the viewport
   AnimationPadding.fromPercentageRange(double bottom, double top)
       : top = AnimationControllerValue(percentage: 1.0 - top),
         bottom = AnimationControllerValue(percentage: bottom);
@@ -68,11 +76,12 @@ class AnimationPadding {
       : top = AnimationControllerValue(pixel: top),
         bottom = AnimationControllerValue(pixel: bottom);
 
+  /// Apply the padding to a controller value
   double apply(double value) {
     return value
         .clamp(
-          bottom?.percentage ?? 0.0,
-          1.0 - (top?.percentage ?? 0.0),
+          bottom?.percentage ?? -double.infinity,
+          top?.percentage != null ? 1.0 - top.percentage : double.infinity,
         )
         .toDouble();
   }
@@ -140,6 +149,9 @@ class RubberAnimationController extends Animation<double>
     if (lowerBound != null) _internalSetValue(initialValue ?? lowerBound);
 
     padding ??= AnimationPadding.fromPercentages(bottom: 0, top: 0);
+    if (padding.bottom == null && padding.top == null) {
+      padding = null;
+    }
   }
 
   /// The value at which this animation is collapsed.
@@ -215,7 +227,7 @@ class RubberAnimationController extends Animation<double>
   /// running; if this happens, it also notifies all the status
   /// listeners.
   @override
-  double get value => padding.apply(_value);
+  double get value => padding?.apply(_value) ?? _value;
   double _value = 0.0;
 
   /// Stops the animation controller and sets the current value of the
@@ -261,8 +273,8 @@ class RubberAnimationController extends Animation<double>
       lowerBoundValue,
       halfBoundValue,
       upperBoundValue,
-      padding.top,
-      padding.bottom,
+      padding?.top,
+      padding?.bottom,
     ]) {
       _resolvePixels(value);
     }
