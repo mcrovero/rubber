@@ -56,7 +56,7 @@ class RubberBottomSheet extends StatefulWidget {
     assert(nullOk != null);
     assert(context != null);
     final RubberBottomSheetState result = context
-        .ancestorStateOfType(const TypeMatcher<RubberBottomSheetState>());
+        .findAncestorStateOfType<RubberBottomSheetState>();
     if (nullOk || result != null) return result;
     throw FlutterError(
         'RubberBottomSheet.of() called with a context that does not contain a RubberBottomSheet.\n'
