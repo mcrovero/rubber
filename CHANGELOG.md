@@ -1,3 +1,8 @@
+## [0.5.0] - 04/03/2021
+
+* Fixed menu layer
+* Fixed deprecated context.ancestorStateOfType(...)
+
 ## [0.4.1] - 28/10/2019
 
 * Fixed alignment issue

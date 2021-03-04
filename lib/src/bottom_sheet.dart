@@ -55,8 +55,8 @@ class RubberBottomSheet extends StatefulWidget {
       {bool nullOk = false}) {
     assert(nullOk != null);
     assert(context != null);
-    final RubberBottomSheetState result = context
-        .findAncestorStateOfType<RubberBottomSheetState>();
+    final RubberBottomSheetState result =
+        context.findAncestorStateOfType<RubberBottomSheetState>();
     if (nullOk || result != null) return result;
     throw FlutterError(
         'RubberBottomSheet.of() called with a context that does not contain a RubberBottomSheet.\n'
@@ -132,7 +132,9 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
     if (widget.menuLayer != null) {
       layout = Stack(
         children: <Widget>[
-          _buildAnimatedBottomsheetWidget(context, child),
+          Align(
+              alignment: Alignment.bottomLeft,
+              child: _buildAnimatedBottomsheetWidget(context, child)),
           Align(alignment: Alignment.bottomLeft, child: widget.menuLayer),
         ],
       );
