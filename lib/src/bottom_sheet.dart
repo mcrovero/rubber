@@ -11,10 +11,10 @@ const double _kCompleteFlingVelocity = 5000.0;
 
 class RubberBottomSheet extends StatefulWidget {
   const RubberBottomSheet(
-      {Key key,
-      @required this.animationController,
-      @required this.lowerLayer,
-      @required this.upperLayer,
+      {Key? key,
+      required this.animationController,
+      required this.lowerLayer,
+      required this.upperLayer,
       this.menuLayer,
       this.scrollController,
       this.header,
@@ -23,27 +23,26 @@ class RubberBottomSheet extends StatefulWidget {
       this.onDragStart,
       this.onDragEnd,
       this.onTap})
-      : assert(animationController != null),
-        super(key: key);
+      : super(key: key);
 
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
   final Widget lowerLayer;
   final Widget upperLayer;
-  final Widget menuLayer;
+  final Widget? menuLayer;
   final double dragFriction;
-  final Function onTap;
+  final Function? onTap;
 
   /// Called when the user stops scrolling, if this function returns a false the bottomsheet
   /// won't complete the next onDragEnd instructions
-  final Function() onDragEnd;
+  final Function()? onDragEnd;
 
   /// Called when the user stops scrolling, if this function returns a false the bottomsheet
   /// won't complete the next onDragEnd instructions
-  final Function() onDragStart;
+  final Function()? onDragStart;
 
   /// The widget on top of the rest of the bottom sheet.
   /// Usually used to make a non-scrollable area
-  final Widget header;
+  final Widget? header;
   // Parameter to change the header height, it's the only way to set the header height
   final double headerHeight;
 
@@ -51,11 +50,9 @@ class RubberBottomSheet extends StatefulWidget {
   /// animation state
   final RubberAnimationController animationController;
 
-  static RubberBottomSheetState of(BuildContext context,
+  static RubberBottomSheetState? of(BuildContext context,
       {bool nullOk = false}) {
-    assert(nullOk != null);
-    assert(context != null);
-    final RubberBottomSheetState result =
+    final RubberBottomSheetState? result =
         context.findAncestorStateOfType<RubberBottomSheetState>();
     if (nullOk || result != null) return result;
     throw FlutterError(
@@ -70,13 +67,14 @@ class RubberBottomSheet extends StatefulWidget {
 
 class RubberBottomSheetState extends State<RubberBottomSheet>
     with TickerProviderStateMixin, AfterLayoutMixin<RubberBottomSheet> {
-  double _screenHeight;
+  late double _screenHeight;
 
   final GlobalKey _keyPeak = GlobalKey();
   final GlobalKey _keyWidget = GlobalKey(debugLabel: 'bottomsheet menu key');
 
   double get _bottomSheetHeight {
-    final RenderBox renderBox = _keyWidget.currentContext.findRenderObject();
+    final RenderBox renderBox =
+        _keyWidget.currentContext!.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
@@ -85,14 +83,14 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
   bool get halfState => controller.halfBound != null;
 
   bool get _shouldScroll =>
-      _scrollController != null && _scrollController.hasClients;
+      _scrollController != null && _scrollController!.hasClients;
   bool _scrolling = false;
 
   bool get _hasHeader => widget.header != null;
 
   /// Adding [substituteScrollController] a value the bottomsheet will change the default one
-  ScrollController substituteScrollController;
-  ScrollController get _scrollController =>
+  ScrollController? substituteScrollController;
+  ScrollController? get _scrollController =>
       substituteScrollController ?? widget.scrollController;
 
   /// If set true the drag won't move the bottomsheet but the scrolling will be always active
@@ -127,7 +125,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
     });
   }
 
-  Widget _buildSlideAnimation(BuildContext context, Widget child) {
+  Widget _buildSlideAnimation(BuildContext context, Widget? child) {
     var layout;
     if (widget.menuLayer != null) {
       layout = Stack(
@@ -142,7 +140,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
       layout = _buildAnimatedBottomsheetWidget(context, child);
     }
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: widget.onTap as void Function()?,
       onVerticalDragDown: _onVerticalDragDown,
       onVerticalDragUpdate: _onVerticalDragUpdate,
       onVerticalDragEnd: _onVerticalDragEnd,
@@ -152,7 +150,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
     );
   }
 
-  Widget _buildAnimatedBottomsheetWidget(BuildContext context, Widget child) {
+  Widget _buildAnimatedBottomsheetWidget(BuildContext context, Widget? child) {
     var heightFactor = widget.animationController.value >= 0
         ? widget.animationController.value
         : 0.0;
@@ -198,8 +196,8 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
   }
 
   // Touch gestures
-  Drag _drag;
-  ScrollHoldController _hold;
+  Drag? _drag;
+  ScrollHoldController? _hold;
 
   void _onVerticalDragDown(DragDownDetails details) {
     if (_enabled) {
@@ -212,12 +210,12 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
       }
       if (_shouldScroll) {
         assert(_hold == null);
-        _hold = _scrollController.position.hold(_disposeHold);
+        _hold = _scrollController!.position.hold(_disposeHold);
       }
     }
   }
 
-  Offset _lastPosition;
+  Offset? _lastPosition;
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     if (_enabled) {
@@ -226,47 +224,47 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
         // _drag might be null if the drag activity ended and called _disposeDrag.
         assert(_hold == null || _drag == null);
         _drag?.update(details);
-        if (_scrollController.position.pixels <= 0 &&
-            details.primaryDelta > 0 &&
+        if (_scrollController!.position.pixels <= 0 &&
+            details.primaryDelta! > 0 &&
             !_forceScrolling) {
           _setScrolling(false);
           _handleDragCancel();
-          if (_scrollController.position.pixels != 0.0) {
-            _scrollController.position.setPixels(0.0);
+          if (_scrollController!.position.pixels != 0.0) {
+            _scrollController!.position.setPixels(0.0);
           }
         }
       } else {
         var friction = 1.0;
         var diff;
         // Friction if more than upper
-        if (controller.value > controller.upperBound) {
-          diff = controller.value - controller.upperBound;
+        if (controller.value > controller.upperBound!) {
+          diff = controller.value - controller.upperBound!;
         }
         // Friction if less than lower
-        else if (controller.value < controller.lowerBound) {
-          diff = controller.lowerBound - controller.value;
+        else if (controller.value < controller.lowerBound!) {
+          diff = controller.lowerBound! - controller.value;
         }
-        if (controller.value < controller.upperBound &&
+        if (controller.value < controller.upperBound! &&
             controller.dismissable &&
             controller.animationState.value == AnimationState.expanded) {
-          diff = controller.upperBound - controller.value;
+          diff = controller.upperBound! - controller.value;
         }
         if (diff != null) {
           friction = widget.dragFriction * pow(1 - diff, 2);
         }
 
-        controller.value -= details.primaryDelta / _screenHeight * friction;
+        controller.value -= details.primaryDelta! / _screenHeight * friction;
         if (_shouldScroll &&
-            controller.value >= controller.upperBound &&
+            controller.value >= controller.upperBound! &&
             !_draggingPeak(_lastPosition)) {
-          controller.value = controller.upperBound;
+          controller.value = controller.upperBound!;
 
           _setScrolling(true);
           var startDetails = DragStartDetails(
               sourceTimeStamp: details.sourceTimeStamp,
               globalPosition: details.globalPosition);
-          _hold = _scrollController.position.hold(_disposeHold);
-          _drag = _scrollController.position.drag(startDetails, _disposeDrag);
+          _hold = _scrollController!.position.hold(_disposeHold);
+          _drag = _scrollController!.position.drag(startDetails, _disposeDrag);
         } else {
           _handleDragCancel();
         }
@@ -282,13 +280,13 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
 
   void _handleDragStart(DragStartDetails details) {
     if (_enabled) {
-      if (widget.onDragStart != null) widget.onDragStart();
+      if (widget.onDragStart != null) widget.onDragStart!();
       if (_shouldScroll) {
         // It's possible for _hold to become null between _handleDragDown and
         // _handleDragStart, for example if some user code calls jumpTo or otherwise
         // triggers a new activity to begin.
         assert(_drag == null);
-        _drag = _scrollController.position.drag(details, _disposeDrag);
+        _drag = _scrollController!.position.drag(details, _disposeDrag);
         assert(_drag != null);
         assert(_hold == null);
       }
@@ -299,7 +297,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
     if (_enabled) {
       // If onDragEnd returns a false value the method interrupts
       if (widget.onDragEnd != null) {
-        var res = widget.onDragEnd();
+        var res = widget.onDragEnd!();
         if (res != null && !res) return;
       }
 
@@ -318,7 +316,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
           if (halfState) {
             if (details.velocity.pixelsPerSecond.dy.abs() >
                 _kMinFlingVelocity) {
-              if (controller.value > controller.halfBound) {
+              if (controller.value > controller.halfBound!) {
                 controller.fling(controller.halfBound, controller.upperBound,
                     velocity: flingVelocity);
               } else {
@@ -327,10 +325,10 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
               }
             } else {
               if (controller.value >
-                  (controller.upperBound + controller.halfBound) / 2) {
+                  (controller.upperBound! + controller.halfBound!) / 2) {
                 controller.expand();
               } else if (controller.value >
-                  (controller.halfBound + controller.lowerBound) / 2) {
+                  (controller.halfBound! + controller.lowerBound!) / 2) {
                 controller.halfExpand();
               } else {
                 controller.collapse();
@@ -343,7 +341,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
                   velocity: flingVelocity);
             } else {
               if (controller.value >
-                  (controller.upperBound + controller.lowerBound) / 2) {
+                  (controller.upperBound! + controller.lowerBound!) / 2) {
                 controller.expand();
               } else {
                 controller.collapse();
@@ -380,12 +378,13 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
     });
   }
 
-  bool _draggingPeak(Offset globalPosition) {
+  bool _draggingPeak(Offset? globalPosition) {
     if (!_hasHeader) return false;
-    final RenderBox renderBoxRed = _keyPeak.currentContext.findRenderObject();
+    final RenderBox renderBoxRed =
+        _keyPeak.currentContext!.findRenderObject() as RenderBox;
     final positionPeak = renderBoxRed.localToGlobal(Offset.zero);
     final sizePeak = renderBoxRed.size;
     final top = (sizePeak.height + positionPeak.dy);
-    return (globalPosition.dy < top);
+    return (globalPosition!.dy < top);
   }
 }
