@@ -33,22 +33,25 @@ class AnimationControllerValue {
   AnimationControllerValue({this.percentage, this.pixel});
   @override
   String toString() {
-    return "AnimationControllerValue(percentage: $percentage pixel: $pixel)";
+    return "AnimationControllerValue(percentage: $percentage, pixel: $pixel)";
   }
 }
 
 /// Pads the animation using value.clamp
 ///
 /// Useful for preventing the sheet from speeding off screen
-/// without compromising too much on bounciness
+/// or out of it's parent widget, without compromising too much on bounciness.
 ///
 /// NOTE: the [top] padding value is interpeted as a distance from the top.
 /// If you want to specify a range, use the `.fromPercentageRange` constructor
 class AnimationPadding {
-  AnimationControllerValue? top;
-  AnimationControllerValue? bottom;
+  static AnimationControllerValue get _zero =>
+      AnimationControllerValue(percentage: 0);
 
-  AnimationPadding({this.top, this.bottom});
+  AnimationControllerValue? top;
+  AnimationControllerValue bottom;
+
+  AnimationPadding({this.top, required this.bottom});
 
   AnimationPadding.all(AnimationControllerValue value)
       : top = value,
@@ -56,14 +59,22 @@ class AnimationPadding {
 
   /// Pad with percent-distances from the top and bottom of the viewport
   ///
-  /// i.e. `AnimationPadding.fromPercentages(bottom: 0, top: 0)` (the default)
-  /// only pads by the screen/viewport
-  AnimationPadding.fromPercentages({double? top, double? bottom})
+  /// i.e. `AnimationPadding.fromPercentages(bottom: 0, top: 0)` or `.contain()` (the default)
+  /// only pads by the screen/viewport or containing widget.
+  AnimationPadding.fromPercentages({double? top, double bottom = 0})
       : top = AnimationControllerValue(percentage: top),
         bottom = AnimationControllerValue(percentage: bottom);
 
-  /// No padding. Allows the bottom sheet to be flung offscreen
-  factory AnimationPadding.none() => AnimationPadding(top: null, bottom: null);
+  /// Contain the animation within the enclosing widget (default)
+  ///
+  /// Same as `AnimationPadding.fromPercentages(bottom: 0, top: 0)`
+  factory AnimationPadding.contain() =>
+      AnimationPadding.fromPercentages(top: 0, bottom: 0);
+
+  /// No padding. Allows the bottom sheet to be flung off the top of the screen,
+  /// but not the bottom (old default behavior).
+  factory AnimationPadding.bottomOnly() =>
+      AnimationPadding(top: null, bottom: _zero);
 
   /// Pad with percent-distances from the bottom of the viewport
   AnimationPadding.fromPercentageRange(double bottom, double top)
@@ -71,17 +82,23 @@ class AnimationPadding {
         bottom = AnimationControllerValue(percentage: bottom);
 
   AnimationPadding.fromPixels({double? top, double? bottom})
-      : top = AnimationControllerValue(pixel: top),
-        bottom = AnimationControllerValue(pixel: bottom);
+      : top = top == null ? null : AnimationControllerValue(pixel: top),
+        bottom =
+            bottom == null ? _zero : AnimationControllerValue(pixel: bottom);
 
   /// Apply the padding to a controller value
   double apply(double value) {
     return value
         .clamp(
-          bottom?.percentage ?? -double.infinity,
+          bottom.percentage ?? 0,
           top?.percentage != null ? 1.0 - top!.percentage! : double.infinity,
         )
         .toDouble();
+  }
+
+  @override
+  String toString() {
+    return "AnimationPadding(top: $top, bottom: $bottom)";
   }
 }
 
@@ -127,25 +144,21 @@ class RubberAnimationController extends Animation<double>
     this.duration,
     this.debugLabel,
     this.animationBehavior = AnimationBehavior.normal,
-    this.padding,
+    AnimationPadding? padding,
     SpringDescription? springDescription,
     required TickerProvider vsync,
   })   : assert(!dismissable || (dismissable && halfBoundValue == null),
             "dismissable sheets are imcompatible with halfBoundValue"),
-        this.lowerBoundValue = lowerBoundValue ??
+        lowerBoundValue = lowerBoundValue ??
             AnimationControllerValue(percentage: dismissable ? 0.0 : 0.1),
-        this.upperBoundValue =
-            upperBoundValue ?? AnimationControllerValue(percentage: 0.9) {
+        upperBoundValue =
+            upperBoundValue ?? AnimationControllerValue(percentage: 0.9),
+        _padding = padding ?? AnimationPadding.contain() {
     if (springDescription != null) _springDescription = springDescription;
 
     _ticker = vsync.createTicker(_tick);
 
     if (lowerBound != null) _internalSetValue(initialValue ?? lowerBound!);
-
-    padding ??= AnimationPadding.fromPercentages(bottom: 0, top: 0);
-    if (padding?.bottom == null && padding?.top == null) {
-      padding = null;
-    }
   }
 
   /// The value at which this animation is collapsed.
@@ -160,11 +173,18 @@ class RubberAnimationController extends Animation<double>
   late AnimationControllerValue upperBoundValue;
   double? get upperBound => upperBoundValue.percentage;
 
+  late AnimationPadding _padding;
+
   /// Pads the animation using value.clamp
   ///
   /// Useful for preventing the sheet from speeding off screen
+  /// or out of containing widget,
   /// without compromising too much on bounciness
-  AnimationPadding? padding;
+  AnimationPadding get padding => _padding;
+  set padding(AnimationPadding p) {
+    _padding = p;
+    pixelValuesToPercentage();
+  }
 
   /// Tells if the bottomsheet has to remain closed after drag down
   final bool dismissable;
@@ -220,7 +240,7 @@ class RubberAnimationController extends Animation<double>
   /// running; if this happens, it also notifies all the status
   /// listeners.
   @override
-  double get value => padding?.apply(_value) ?? _value;
+  double get value => padding.apply(_value);
   double _value = 0.0;
 
   /// Stops the animation controller and sets the current value of the
@@ -252,6 +272,7 @@ class RubberAnimationController extends Animation<double>
 
   void _resolvePixels(AnimationControllerValue value) {
     final px = value.pixel;
+    print([px, _height]);
     if (px != null && _height > 0.0) {
       value.percentage = (px / _height).toDouble();
     }
@@ -262,12 +283,13 @@ class RubberAnimationController extends Animation<double>
     if (initialValue == null && lowerBound == null) {
       _value = lowerBoundValue.pixel! / _height;
     }
+    print(padding);
     for (final value in [
       lowerBoundValue,
       halfBoundValue,
       upperBoundValue,
-      padding?.top,
-      padding?.bottom,
+      padding.top,
+      padding.bottom,
     ]) {
       if (value != null) {
         _resolvePixels(value);

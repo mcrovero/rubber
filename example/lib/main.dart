@@ -1,9 +1,10 @@
-import 'package:example/dismissable.dart';
-import 'package:example/scroll.dart';
-import 'package:example/spring.dart';
 import 'package:flutter/material.dart';
 import 'package:example/default.dart';
 import 'package:example/menu.dart';
+import 'package:example/spring.dart';
+import 'package:example/padding.dart';
+import 'package:example/scroll.dart';
+import 'package:example/dismissable.dart';
 
 void main() => runApp(MyApp());
 
@@ -68,6 +69,15 @@ class _HomePageState extends State<HomePage>
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SpringPage()),
+              );
+            },
+          ),
+          ElevatedButton(
+            child: Text("Animation Padding"),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AnimationPaddingPage()),
               );
             },
           ),
