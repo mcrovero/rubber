@@ -6,6 +6,8 @@ import 'package:rubber/src/animation_controller.dart';
 
 import 'package:after_layout/after_layout.dart';
 
+import '../rubber.dart';
+
 const double _kMinFlingVelocity = 700.0;
 const double _kCompleteFlingVelocity = 5000.0;
 
@@ -19,7 +21,7 @@ class RubberBottomSheet extends StatefulWidget {
       this.scrollController,
       this.header,
       this.headerHeight = 50.0,
-      this.dragFriction = 0.52,
+      this.dragFriction = 0.48,
       this.onDragStart,
       this.onDragEnd,
       this.onTap})
@@ -40,7 +42,7 @@ class RubberBottomSheet extends StatefulWidget {
   /// won't complete the next onDragEnd instructions
   final Function()? onDragStart;
 
-  /// The widget on top of the rest of the bottom sheet.
+  /// The widget on top of the rest of the bottom sheet.)
   /// Usually used to make a non-scrollable area
   final Widget? header;
   // Parameter to change the header height, it's the only way to set the header height
@@ -151,12 +153,9 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
   }
 
   Widget _buildAnimatedBottomsheetWidget(BuildContext context, Widget? child) {
-    var heightFactor = widget.animationController.value >= 0
-        ? widget.animationController.value
-        : 0.0;
     return FractionallySizedBox(
         alignment: Alignment.bottomCenter,
-        heightFactor: heightFactor,
+        heightFactor: widget.animationController.value,
         child: child);
   }
 
@@ -253,7 +252,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
           friction = widget.dragFriction * pow(1 - diff, 2);
         }
 
-        controller.value -= details.primaryDelta! / _screenHeight * friction;
+        controller.value -= details.primaryDelta! / (_screenHeight * friction);
         if (_shouldScroll &&
             controller.value >= controller.upperBound! &&
             !_draggingPeak(_lastPosition)) {
