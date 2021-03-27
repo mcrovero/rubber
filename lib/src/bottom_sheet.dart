@@ -21,7 +21,7 @@ class RubberBottomSheet extends StatefulWidget {
       this.scrollController,
       this.header,
       this.headerHeight = 50.0,
-      this.dragFriction = 0.48,
+      this.dragFriction = 0.52,
       this.onDragStart,
       this.onDragEnd,
       this.onTap})
@@ -31,6 +31,12 @@ class RubberBottomSheet extends StatefulWidget {
   final Widget lowerLayer;
   final Widget upperLayer;
   final Widget? menuLayer;
+
+  /// Friction to apply when the sheet reaches its bounds.
+  /// The higher the number, the more friction is applied.
+  /// Defaults to 0.52.
+  ///
+  /// Warning: If `dragFriction < 0`, your bottom sheet will accelerate off the screen.
   final double dragFriction;
   final Function? onTap;
 
@@ -42,7 +48,7 @@ class RubberBottomSheet extends StatefulWidget {
   /// won't complete the next onDragEnd instructions
   final Function()? onDragStart;
 
-  /// The widget on top of the rest of the bottom sheet.)
+  /// The widget on top of the rest of the bottom sheet.
   /// Usually used to make a non-scrollable area
   final Widget? header;
   // Parameter to change the header height, it's the only way to set the header height
@@ -249,10 +255,10 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
           diff = controller.upperBound! - controller.value;
         }
         if (diff != null) {
-          friction = widget.dragFriction * pow(1 - diff, 2);
+          friction = 1 + (widget.dragFriction * pow(1 - diff, 2));
         }
 
-        controller.value -= details.primaryDelta! / (_screenHeight * friction);
+        controller.value -= details.primaryDelta! / _screenHeight / friction;
         if (_shouldScroll &&
             controller.value >= controller.upperBound! &&
             !_draggingPeak(_lastPosition)) {

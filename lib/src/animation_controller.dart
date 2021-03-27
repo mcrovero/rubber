@@ -272,7 +272,6 @@ class RubberAnimationController extends Animation<double>
 
   void _resolvePixels(AnimationControllerValue value) {
     final px = value.pixel;
-    print([px, _height]);
     if (px != null && _height > 0.0) {
       value.percentage = (px / _height).toDouble();
     }
@@ -283,7 +282,6 @@ class RubberAnimationController extends Animation<double>
     if (initialValue == null && lowerBound == null) {
       _value = lowerBoundValue.pixel! / _height;
     }
-    print(padding);
     for (final value in [
       lowerBoundValue,
       halfBoundValue,
