@@ -6,6 +6,8 @@ import 'package:rubber/src/animation_controller.dart';
 
 import 'package:after_layout/after_layout.dart';
 
+import '../rubber.dart';
+
 const double _kMinFlingVelocity = 700.0;
 const double _kCompleteFlingVelocity = 5000.0;
 
@@ -29,6 +31,12 @@ class RubberBottomSheet extends StatefulWidget {
   final Widget lowerLayer;
   final Widget upperLayer;
   final Widget? menuLayer;
+
+  /// Friction to apply when the sheet reaches its bounds.
+  /// The higher the number, the more friction is applied.
+  /// Defaults to 0.52.
+  ///
+  /// Warning: If `dragFriction < 0`, your bottom sheet will accelerate off the screen.
   final double dragFriction;
   final Function? onTap;
 
@@ -151,12 +159,9 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
   }
 
   Widget _buildAnimatedBottomsheetWidget(BuildContext context, Widget? child) {
-    var heightFactor = widget.animationController.value >= 0
-        ? widget.animationController.value
-        : 0.0;
     return FractionallySizedBox(
         alignment: Alignment.bottomCenter,
-        heightFactor: heightFactor,
+        heightFactor: widget.animationController.value,
         child: child);
   }
 
@@ -250,10 +255,10 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
           diff = controller.upperBound! - controller.value;
         }
         if (diff != null) {
-          friction = widget.dragFriction * pow(1 - diff, 2);
+          friction = 1 + (widget.dragFriction * pow(1 - diff, 2));
         }
 
-        controller.value -= details.primaryDelta! / _screenHeight * friction;
+        controller.value -= details.primaryDelta! / _screenHeight / friction;
         if (_shouldScroll &&
             controller.value >= controller.upperBound! &&
             !_draggingPeak(_lastPosition)) {
