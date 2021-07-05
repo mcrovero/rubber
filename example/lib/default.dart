@@ -8,8 +8,8 @@ class DefaultPage extends StatefulWidget {
   _DefaultPageState createState() => _DefaultPageState();
 }
 
-class _DefaultPageState extends State<DefaultPage> with SingleTickerProviderStateMixin {
-
+class _DefaultPageState extends State<DefaultPage>
+    with SingleTickerProviderStateMixin {
   RubberAnimationController _controller;
 
   @override
@@ -18,8 +18,7 @@ class _DefaultPageState extends State<DefaultPage> with SingleTickerProviderStat
         vsync: this,
         halfBoundValue: AnimationControllerValue(percentage: 0.5),
         lowerBoundValue: AnimationControllerValue(pixel: 200),
-        duration: Duration(milliseconds: 200)
-    );
+        duration: Duration(milliseconds: 200));
     _controller.addStatusListener(_statusListener);
     _controller.animationState.addListener(_stateListener);
     super.initState();
@@ -48,7 +47,10 @@ class _DefaultPageState extends State<DefaultPage> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Default",style: TextStyle(color: Colors.cyan[900]),),
+        title: Text(
+          "Default",
+          style: TextStyle(color: Colors.cyan[900]),
+        ),
       ),
       body: Container(
         child: RubberBottomSheet(
@@ -86,16 +88,13 @@ class _DefaultPageState extends State<DefaultPage> with SingleTickerProviderStat
 
   Widget _getLowerLayer() {
     return Container(
-      decoration: BoxDecoration(
-          color: Colors.cyan[100]
-      ),
+      decoration: BoxDecoration(color: Colors.cyan[100]),
     );
   }
+
   Widget _getUpperLayer() {
     return Container(
-      decoration: BoxDecoration(
-          color: Colors.cyan
-      ),
+      decoration: BoxDecoration(color: Colors.cyan),
     );
   }
 }

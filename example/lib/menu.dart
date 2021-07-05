@@ -8,32 +8,36 @@ class MenuPage extends StatefulWidget {
   _MenuPageState createState() => _MenuPageState();
 }
 
-class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin {
-
+class _MenuPageState extends State<MenuPage>
+    with SingleTickerProviderStateMixin {
   RubberAnimationController _controller;
 
   @override
   void initState() {
     _controller = RubberAnimationController(
-        vsync: this,
-        dismissable: true,
-        lowerBoundValue: AnimationControllerValue(pixel: 100),
-        upperBoundValue: AnimationControllerValue(pixel: 400),
-        duration: Duration(milliseconds: 200)
+      vsync: this,
+      dismissable: true,
+      lowerBoundValue: AnimationControllerValue(pixel: 100),
+      upperBoundValue: AnimationControllerValue(pixel: 400),
+      duration: Duration(milliseconds: 200),
     );
     super.initState();
   }
 
   void _expand() {
     print("expand");
-    _controller.launchTo(_controller.value,_controller.upperBound,velocity: 2);
+    _controller.launchTo(_controller.value, _controller.upperBound,
+        velocity: 2);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Menu",style: TextStyle(color: Colors.cyan[900]),),
+        title: Text(
+          "Menu",
+          style: TextStyle(color: Colors.cyan[900]),
+        ),
       ),
       body: Container(
         child: RubberBottomSheet(
@@ -55,28 +59,23 @@ class _MenuPageState extends State<MenuPage> with SingleTickerProviderStateMixin
 
   Widget _getLowerLayer() {
     return Container(
-      decoration: BoxDecoration(
-          color: Colors.cyan[100]
-      ),
+      decoration: BoxDecoration(color: Colors.cyan[100]),
     );
   }
+
   Widget _getUpperLayer() {
     return Container(
-      decoration: BoxDecoration(
-          color: Colors.cyan
-      ),
+      decoration: BoxDecoration(color: Colors.cyan),
     );
   }
+
   Widget _getMenuLayer() {
     return Container(
       height: 100,
       child: Center(
         child: Text("MENU"),
       ),
-      decoration: BoxDecoration(
-        color: Colors.red
-      ),
+      decoration: BoxDecoration(color: Colors.red),
     );
   }
-
 }
