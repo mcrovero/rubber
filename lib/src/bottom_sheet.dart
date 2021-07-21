@@ -110,6 +110,10 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
     _setScrolling(force);
   }
 
+  updateScroll(bool scroll) {
+    _setScrolling(scroll);
+  }
+
   bool _enabled = true;
   set enable(value) {
     _enabled = value;
@@ -217,7 +221,8 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
       }
       if (_shouldScroll) {
         assert(_hold == null);
-        _hold = _scrollController!.position.hold(_disposeHold);
+        if (_scrollController != null && _scrollController!.hasClients)
+          _hold = _scrollController!.position.hold(_disposeHold);
       }
     }
   }
