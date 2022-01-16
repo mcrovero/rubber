@@ -504,17 +504,7 @@ class RubberAnimationController extends Animation<double>
   /// after this method is called.
   @override
   void dispose() {
-    assert(() {
-      if (_ticker == null) {
-        throw FlutterError(
-            'AnimationController.dispose() called more than once.\n'
-            'A given $runtimeType cannot be disposed more than once.\n'
-            'The following $runtimeType object was disposed multiple times:\n'
-            '  $this');
-      }
-      return true;
-    }());
-    _ticker!.dispose();
+    _ticker?.dispose();
     _ticker = null;
     super.dispose();
   }
