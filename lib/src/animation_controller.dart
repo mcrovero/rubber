@@ -385,7 +385,7 @@ class RubberAnimationController extends Animation<double>
     final AnimationBehavior behavior =
         animationBehavior ?? this.animationBehavior;
     double scale = 1.0;
-    if (SemanticsBinding.instance!.disableAnimations) {
+    if (SemanticsBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
           scale = 0.05;
@@ -455,7 +455,7 @@ class RubberAnimationController extends Animation<double>
     double scale = 1.0;
     final AnimationBehavior behavior =
         animationBehavior ?? this.animationBehavior;
-    if (SemanticsBinding.instance!.disableAnimations) {
+    if (SemanticsBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
           scale = 200.0;
