@@ -3,7 +3,7 @@ import 'package:rubber/rubber.dart';
 
 class DismissablePage extends StatefulWidget {
 
-  DismissablePage({Key key}) : super(key: key);
+  DismissablePage({Key? key}) : super(key: key);
 
   @override
   _DismissablePageState createState() => _DismissablePageState();
@@ -12,7 +12,7 @@ class DismissablePage extends StatefulWidget {
 
 class _DismissablePageState extends State<DismissablePage> with SingleTickerProviderStateMixin {
 
-  RubberAnimationController _controller;
+  late RubberAnimationController _controller;
 
   ScrollController _scrollController = ScrollController();
 

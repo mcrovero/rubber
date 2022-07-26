@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class AnimationPaddingPage extends StatefulWidget {
-  AnimationPaddingPage({Key key}) : super(key: key);
+  AnimationPaddingPage({Key? key}) : super(key: key);
 
   @override
   _AnimationPaddingPageState createState() => _AnimationPaddingPageState();
@@ -10,7 +10,7 @@ class AnimationPaddingPage extends StatefulWidget {
 
 class _AnimationPaddingPageState extends State<AnimationPaddingPage>
     with SingleTickerProviderStateMixin {
-  RubberAnimationController _controller;
+  late RubberAnimationController _controller;
 
   static final contain = AnimationPadding.contain();
   static final fivePercent =
@@ -86,7 +86,8 @@ class _AnimationPaddingPageState extends State<AnimationPaddingPage>
     );
   }
 
-  void _handleAnimationPaddingChange(AnimationPadding padding) {
+  void _handleAnimationPaddingChange(AnimationPadding? padding) {
+    if (padding == null) return;
     _padding = padding;
     setState(() {
       _controller.padding = _padding;

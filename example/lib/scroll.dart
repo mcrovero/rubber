@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class ScrollPage extends StatefulWidget {
-  ScrollPage({Key key}) : super(key: key);
+  ScrollPage({Key? key}) : super(key: key);
 
   @override
   _ScrollPageState createState() => _ScrollPageState();
@@ -10,7 +10,7 @@ class ScrollPage extends StatefulWidget {
 
 class _ScrollPageState extends State<ScrollPage>
     with SingleTickerProviderStateMixin {
-  RubberAnimationController _controller;
+  late RubberAnimationController _controller;
 
   ScrollController _scrollController = ScrollController();
 

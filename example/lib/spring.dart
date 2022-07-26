@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class SpringPage extends StatefulWidget {
-  SpringPage({Key key}) : super(key: key);
+  SpringPage({Key? key}) : super(key: key);
 
   @override
   _SpringPageState createState() => _SpringPageState();
@@ -10,7 +10,7 @@ class SpringPage extends StatefulWidget {
 
 class _SpringPageState extends State<SpringPage>
     with SingleTickerProviderStateMixin {
-  RubberAnimationController _controller;
+  late RubberAnimationController _controller;
 
   double _dampingValue = DampingRatio.HIGH_BOUNCY;
   double _stiffnessValue = Stiffness.HIGH;
@@ -113,14 +113,16 @@ class _SpringPageState extends State<SpringPage>
     );
   }
 
-  void _handleStiffnessValueChange(double value) {
+  void _handleStiffnessValueChange(double? value) {
+    if (value == null) return;
     _stiffnessValue = value;
     setState(() {
       _setController();
     });
   }
 
-  void _handleDampingValueChange(double value) {
+  void _handleDampingValueChange(double? value) {
+    if (value == null) return;
     _dampingValue = value;
     setState(() {
       _setController();
