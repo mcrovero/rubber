@@ -147,7 +147,7 @@ class RubberAnimationController extends Animation<double>
     AnimationPadding? padding,
     SpringDescription? springDescription,
     required TickerProvider vsync,
-  })   : assert(!dismissable || (dismissable && halfBoundValue == null),
+  })  : assert(!dismissable || (dismissable && halfBoundValue == null),
             "dismissable sheets are imcompatible with halfBoundValue"),
         lowerBoundValue = lowerBoundValue ??
             AnimationControllerValue(percentage: dismissable ? 0.0 : 0.1),
@@ -251,6 +251,9 @@ class RubberAnimationController extends Animation<double>
   /// Value listeners are notified even if this does not change the value.
   /// Status listeners are notified if the animation was previously playing.
   set value(double newValue) {
+    if (lowerBound != null && newValue <= lowerBound!) {
+      newValue = lowerBound!;
+    }
     stop();
     _internalSetValue(newValue);
     notifyListeners();
