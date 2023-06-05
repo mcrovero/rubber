@@ -1,3 +1,8 @@
+## [1.1.0] - 06/06/2023
+* Updated for flutter 3.0
+* Fix AnimationController.dispose() called more than once
+* Updated example
+
 ## [0.5.0] - 04/03/2021
 
 * Fixed menu layer
