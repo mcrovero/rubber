@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:example/default.dart';
-import 'package:example/menu.dart';
-import 'package:example/spring.dart';
-import 'package:example/padding.dart';
-import 'package:example/scroll.dart';
-import 'package:example/dismissable.dart';
+
+import 'default.dart';
+import 'dismissable.dart';
+import 'menu.dart';
+import 'padding.dart';
+import 'scroll.dart';
+import 'spring.dart';
 
 void main() => runApp(MyApp());
 
