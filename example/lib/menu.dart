@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class MenuPage extends StatefulWidget {
-  MenuPage({Key key}) : super(key: key);
+  MenuPage({Key? key}) : super(key: key);
 
   @override
   _MenuPageState createState() => _MenuPageState();
@@ -10,7 +10,7 @@ class MenuPage extends StatefulWidget {
 
 class _MenuPageState extends State<MenuPage>
     with SingleTickerProviderStateMixin {
-  RubberAnimationController _controller;
+  late RubberAnimationController _controller;
 
   @override
   void initState() {

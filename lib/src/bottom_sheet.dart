@@ -180,13 +180,17 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
       height: widget.headerHeight,
       child: widget.header,
     );
-    var bottomSheet = Stack(children: <Widget>[
-      peak,
-      Container(
+    var bottomSheet = Stack(
+      children: <Widget>[
+        peak,
+        Container(
           margin: EdgeInsets.only(
-              top: widget.header != null ? widget.headerHeight : 0),
-          child: widget.upperLayer)
-    ]);
+            top: widget.header != null ? widget.headerHeight : 0,
+          ),
+          child: widget.upperLayer,
+        ),
+      ],
+    );
     var elem;
     if (_display) {
       elem = AnimatedBuilder(

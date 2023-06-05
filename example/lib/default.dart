@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class DefaultPage extends StatefulWidget {
-  DefaultPage({Key key}) : super(key: key);
+  DefaultPage({Key? key}) : super(key: key);
 
   @override
   _DefaultPageState createState() => _DefaultPageState();
@@ -10,7 +10,7 @@ class DefaultPage extends StatefulWidget {
 
 class _DefaultPageState extends State<DefaultPage>
     with SingleTickerProviderStateMixin {
-  RubberAnimationController _controller;
+  late RubberAnimationController _controller;
 
   @override
   void initState() {
