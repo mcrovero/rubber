@@ -1,3 +1,16 @@
+## Unreleased
+
+* Report correct forward, reverse, completed, and dismissed animation statuses.
+* Recalculate pixel bounds whenever the available layout height changes.
+* Clamp `animateTo` and `launchTo` targets to the controller bounds.
+* Add strict bound enforcement with `RubberAnimationBoundsBehavior.strict`.
+* Add configurable snap and fling thresholds.
+* Add the declarative `draggable` option while retaining the runtime `enable` setter.
+* Add an animated, customizable scrim with an optional tap callback.
+* Fill the available upper-layer area below the header.
+* Improve scroll handoff during fast expansion and apply the first downward drag delta.
+* Remove the `after_layout` dependency.
+
 ## [2.0.0] - 13/09/2026
 
 * Updated the package and example for Flutter 3.44 and Dart 3.12.

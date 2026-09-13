@@ -22,6 +22,15 @@ const Tolerance _kFlingTolerance = Tolerance(
 
 enum AnimationState { expanded, half_expanded, collapsed, animating }
 
+/// Controls whether the sheet may stretch beyond its configured bounds.
+enum RubberAnimationBoundsBehavior {
+  /// Preserve Rubber's elastic overscroll behavior.
+  elastic,
+
+  /// Keep the sheet between its lower and upper bounds.
+  strict,
+}
+
 class AnimationControllerValue {
   double? percentage;
   double? pixel;
@@ -138,6 +147,7 @@ class RubberAnimationController extends Animation<double>
     this.duration,
     this.debugLabel,
     this.animationBehavior = AnimationBehavior.normal,
+    this.boundsBehavior = RubberAnimationBoundsBehavior.elastic,
     AnimationPadding? padding,
     SpringDescription? springDescription,
     required TickerProvider vsync,
@@ -155,7 +165,11 @@ class RubberAnimationController extends Animation<double>
 
     _ticker = vsync.createTicker(_tick);
 
-    if (lowerBound != null) _internalSetValue(initialValue ?? lowerBound!);
+    if (lowerBound != null) {
+      _internalSetValue(_clampTarget(initialValue ?? lowerBound!));
+      _status = _statusForValue(_value);
+      _checkState();
+    }
   }
 
   /// The value at which this animation is collapsed.
@@ -198,6 +212,12 @@ class RubberAnimationController extends Animation<double>
   /// [AnimationController.unbounded] constructor.
   final AnimationBehavior animationBehavior;
 
+  /// Whether values can stretch beyond the configured sheet bounds.
+  ///
+  /// The default preserves Rubber's elastic behavior. Set this to
+  /// [RubberAnimationBoundsBehavior.strict] when overscroll is not wanted.
+  final RubberAnimationBoundsBehavior boundsBehavior;
+
   SpringDescription _springDescription = _kFlingSpringDefaultDescription;
   set springDescription(SpringDescription value) {
     _springDescription = value;
@@ -238,13 +258,23 @@ class RubberAnimationController extends Animation<double>
   /// running; if this happens, it also notifies all the status
   /// listeners.
   @override
-  double get value => padding.apply(_value);
+  double get value {
+    var result = padding.apply(_value);
+    if (boundsBehavior == RubberAnimationBoundsBehavior.strict &&
+        lowerBound != null &&
+        upperBound != null) {
+      result = result.clamp(lowerBound!, upperBound!).toDouble();
+    }
+    return result;
+  }
+
   double _value = 0.0;
 
   /// Stops the animation controller and sets the current value of the
   /// animation.
   ///
-  /// The new value is clamped to the range set by [lowerBound] and [upperBound].
+  /// The new value is clamped at [lowerBound]. In strict bounds mode it is
+  /// also clamped at [upperBound].
   ///
   /// Value listeners are notified even if this does not change the value.
   /// Status listeners are notified if the animation was previously playing.
@@ -252,9 +282,23 @@ class RubberAnimationController extends Animation<double>
     if (lowerBound != null && newValue <= lowerBound!) {
       newValue = lowerBound!;
     }
+    if (boundsBehavior == RubberAnimationBoundsBehavior.strict &&
+        upperBound != null &&
+        newValue >= upperBound!) {
+      newValue = upperBound!;
+    }
+    final oldValue = value;
     stop();
     _internalSetValue(newValue);
     notifyListeners();
+    _setStatus(
+      _statusForValue(
+        value,
+        direction: value < oldValue
+            ? AnimationStatus.reverse
+            : AnimationStatus.forward,
+      ),
+    );
     _checkState();
   }
 
@@ -265,10 +309,40 @@ class RubberAnimationController extends Animation<double>
   }
 
   double _height = 0.0;
-  set height(double value) {
-    _height = value;
+  double get height => _height;
+  set height(double newHeight) {
+    if (!newHeight.isFinite || newHeight <= 0 || newHeight == _height) return;
+
+    final oldHeight = _height;
+    final oldValue = _value;
+    final oldState = animationState.value;
+    _height = newHeight;
     pixelValuesToPercentage();
-    value = _value;
+
+    if (oldHeight > 0) {
+      switch (oldState) {
+        case AnimationState.collapsed:
+          _value = lowerBound ?? oldValue;
+          break;
+        case AnimationState.half_expanded:
+          _value = halfBound ?? oldValue;
+          break;
+        case AnimationState.expanded:
+          _value = upperBound ?? oldValue;
+          break;
+        case AnimationState.animating:
+          stop();
+          _value = oldValue * oldHeight / newHeight;
+          break;
+      }
+    }
+
+    if (boundsBehavior == RubberAnimationBoundsBehavior.strict) {
+      _value = _clampTarget(_value);
+    }
+    notifyListeners();
+    _setStatus(_statusForValue(value));
+    _checkState();
   }
 
   void _resolvePixels(AnimationControllerValue value) {
@@ -279,6 +353,7 @@ class RubberAnimationController extends Animation<double>
   }
 
   void pixelValuesToPercentage() {
+    if (_height <= 0) return;
     // sets initial value if lowerbound has only pixel value
     if (initialValue == null && lowerBound == null) {
       _value = lowerBoundValue.pixel! / _height;
@@ -328,10 +403,10 @@ class RubberAnimationController extends Animation<double>
   @override
   bool get isAnimating => _ticker != null && _ticker!.isActive;
 
-  /// Tells if the animations is running(forward) or completed
+  /// The current animation direction or boundary status.
   @override
   AnimationStatus get status => _status;
-  AnimationStatus _status = AnimationStatus.completed;
+  AnimationStatus _status = AnimationStatus.dismissed;
 
   TickerFuture expand({double? from}) {
     return animateTo(from: from, to: upperBound!);
@@ -360,8 +435,8 @@ class RubberAnimationController extends Animation<double>
       }
       return true;
     }());
-    if (from != null) value = from;
-    return _animateToInternal(to, curve: curve);
+    if (from != null) value = _clampTarget(from);
+    return _animateToInternal(_clampTarget(to), curve: curve);
   }
 
   ValueNotifier<bool> visibility = ValueNotifier(true);
@@ -370,6 +445,10 @@ class RubberAnimationController extends Animation<double>
   }
 
   void _checkState() {
+    if (lowerBound == null || upperBound == null) {
+      animationState.value = AnimationState.animating;
+      return;
+    }
     var roundValue = double.parse(value.toStringAsFixed(2));
     var roundLowerBound = double.parse(lowerBound!.toStringAsFixed(2));
     var roundHalfBound = 0.0;
@@ -434,7 +513,7 @@ class RubberAnimationController extends Animation<double>
         _value = target;
         notifyListeners();
       }
-      _status = AnimationStatus.completed;
+      _setStatus(_statusForValue(value));
       _checkState();
       return TickerFuture.complete();
     }
@@ -448,6 +527,10 @@ class RubberAnimationController extends Animation<double>
         curve,
         scale,
       ),
+      target: target,
+      direction: target < _value
+          ? AnimationStatus.reverse
+          : AnimationStatus.forward,
     );
   }
 
@@ -498,13 +581,25 @@ class RubberAnimationController extends Animation<double>
       }
     }
 
+    if (to == null) {
+      throw ArgumentError.notNull('to');
+    }
+    final clampedFrom = _clampTarget(from);
+    final target = _clampTarget(to);
     final Simulation simulation = SpringSimulation(
       _springDescription,
-      from,
-      to!,
+      clampedFrom,
+      target,
       velocity * scale,
     )..tolerance = _kFlingTolerance;
-    return animateWith(simulation);
+    stop();
+    return _startSimulation(
+      simulation,
+      target: target,
+      direction: target < clampedFrom
+          ? AnimationStatus.reverse
+          : AnimationStatus.forward,
+    );
   }
 
   /// Drives the animation according to the given simulation.
@@ -515,14 +610,27 @@ class RubberAnimationController extends Animation<double>
     return _startSimulation(simulation);
   }
 
-  TickerFuture _startSimulation(Simulation simulation) {
+  double? _simulationTarget;
+  AnimationStatus _simulationDirection = AnimationStatus.forward;
+
+  TickerFuture _startSimulation(
+    Simulation simulation, {
+    double? target,
+    AnimationStatus? direction,
+  }) {
     assert(!isAnimating);
     _simulation = simulation;
+    _simulationTarget = target;
     _lastElapsedDuration = Duration.zero;
     _value = simulation.x(0.0);
+    _simulationDirection =
+        direction ??
+        (simulation.dx(0.0) < 0
+            ? AnimationStatus.reverse
+            : AnimationStatus.forward);
     final TickerFuture result = _ticker!.start();
-    _status = AnimationStatus.forward;
-    notifyStatusListeners(_status);
+    _setStatus(_simulationDirection);
+    _checkState();
     return result;
   }
 
@@ -532,6 +640,7 @@ class RubberAnimationController extends Animation<double>
   /// current state.
   void stop({bool canceled = true}) {
     _simulation = null;
+    _simulationTarget = null;
     _lastElapsedDuration = null;
     _ticker!.stop(canceled: canceled);
   }
@@ -551,16 +660,62 @@ class RubberAnimationController extends Animation<double>
         elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
     _value = _simulation!.x(elapsedInSeconds);
-    if (_simulation!.isDone(elapsedInSeconds) ||
+    final reachedStrictTarget =
+        boundsBehavior == RubberAnimationBoundsBehavior.strict &&
+        _simulationTarget != null &&
+        ((_simulationDirection == AnimationStatus.forward &&
+                _value >= _simulationTarget!) ||
+            (_simulationDirection == AnimationStatus.reverse &&
+                _value <= _simulationTarget!));
+    if (boundsBehavior == RubberAnimationBoundsBehavior.strict) {
+      _value = _clampTarget(_value);
+    }
+    if (reachedStrictTarget ||
+        _simulation!.isDone(elapsedInSeconds) ||
         (dismissable && _value < lowerBound! && elapsedInSeconds > 0)) {
-      if (_value < lowerBound! && dismissable) _value = lowerBound!;
+      final target = _simulationTarget;
+      if (target != null) {
+        _value = target;
+      } else if (_value < lowerBound! && dismissable) {
+        _value = lowerBound!;
+      }
 
-      _status = AnimationStatus.completed;
-      notifyStatusListeners(_status);
-      stop();
+      final completedStatus = _statusForValue(
+        value,
+        direction: _simulationDirection,
+      );
+      stop(canceled: false);
+      _setStatus(completedStatus);
       _checkState();
     }
     notifyListeners();
+  }
+
+  double _clampTarget(double target) {
+    final lower = lowerBound;
+    final upper = upperBound;
+    if (lower == null || upper == null) return target;
+    return target.clamp(lower, upper).toDouble();
+  }
+
+  AnimationStatus _statusForValue(
+    double currentValue, {
+    AnimationStatus direction = AnimationStatus.forward,
+  }) {
+    const epsilon = 0.000001;
+    if (lowerBound != null && currentValue <= lowerBound! + epsilon) {
+      return AnimationStatus.dismissed;
+    }
+    if (upperBound != null && currentValue >= upperBound! - epsilon) {
+      return AnimationStatus.completed;
+    }
+    return direction;
+  }
+
+  void _setStatus(AnimationStatus newStatus) {
+    if (_status == newStatus) return;
+    _status = newStatus;
+    notifyStatusListeners(_status);
   }
 
   @override
