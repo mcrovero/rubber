@@ -1,4 +1,4 @@
-## Unreleased
+## [2.0.0] - 13/09/2026
 
 * Updated the package and example for Flutter 3.44 and Dart 3.12.
 * Migrated Android to the declarative Gradle plugin configuration, AGP 9, Gradle 9, Kotlin 2.3, and Java 17.
