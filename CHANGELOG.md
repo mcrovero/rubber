@@ -1,4 +1,4 @@
-## Unreleased
+## [2.1.0] - 13/09/2026
 
 * Report correct forward, reverse, completed, and dismissed animation statuses.
 * Recalculate pixel bounds whenever the available layout height changes.
