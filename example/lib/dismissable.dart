@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class DismissablePage extends StatefulWidget {
-
-  DismissablePage({Key? key}) : super(key: key);
+  const DismissablePage({super.key});
 
   @override
-  _DismissablePageState createState() => _DismissablePageState();
-
+  State<DismissablePage> createState() => _DismissablePageState();
 }
 
-class _DismissablePageState extends State<DismissablePage> with SingleTickerProviderStateMixin {
-
+class _DismissablePageState extends State<DismissablePage>
+    with SingleTickerProviderStateMixin {
   late RubberAnimationController _controller;
 
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -23,7 +21,7 @@ class _DismissablePageState extends State<DismissablePage> with SingleTickerProv
       //lowerBoundValue: AnimationControllerValue(percentage: 0.0),
       upperBoundValue: AnimationControllerValue(percentage: 0.9),
       duration: Duration(milliseconds: 200),
-      dismissable: true
+      dismissable: true,
     );
     super.initState();
   }
@@ -32,21 +30,19 @@ class _DismissablePageState extends State<DismissablePage> with SingleTickerProv
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Dismissable",style: TextStyle(color: Colors.cyan[900]),),
+        title: Text("Dismissable", style: TextStyle(color: Colors.cyan[900])),
       ),
-      body: Container(
-        child: RubberBottomSheet(
-          onDragEnd: (){
-            print("onDragEnd");
-          },
-          scrollController: _scrollController,
-          lowerLayer: _getLowerLayer(),
-          upperLayer: _getUpperLayer(),
-          animationController: _controller,
-        ),
+      body: RubberBottomSheet(
+        onDragEnd: () {
+          debugPrint("onDragEnd");
+        },
+        scrollController: _scrollController,
+        lowerLayer: _getLowerLayer(),
+        upperLayer: _getUpperLayer(),
+        animationController: _controller,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
+        onPressed: () {
           _controller.expand();
         },
       ),
@@ -54,25 +50,19 @@ class _DismissablePageState extends State<DismissablePage> with SingleTickerProv
   }
 
   Widget _getLowerLayer() {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.cyan[100]
-      ),
-    );
+    return Container(decoration: BoxDecoration(color: Colors.cyan[100]));
   }
 
   Widget _getUpperLayer() {
     return Container(
-      decoration: BoxDecoration(
-          color: Colors.cyan
-      ),
+      decoration: BoxDecoration(color: Colors.cyan),
       child: ListView.builder(
         physics: NeverScrollableScrollPhysics(),
         controller: _scrollController,
         itemBuilder: (BuildContext context, int index) {
           return ListTile(title: Text("Item $index"));
         },
-        itemCount: 20
+        itemCount: 20,
       ),
     );
   }

@@ -1,3 +1,10 @@
+## Unreleased
+
+* Updated the package and example for Flutter 3.44 and Dart 3.12.
+* Migrated Android to the declarative Gradle plugin configuration, AGP 9, Gradle 9, Kotlin 2.3, and Java 17.
+* Raised the example's iOS deployment target to iOS 13 and adopted the scene lifecycle.
+* Replaced deprecated radio APIs and enabled the current Flutter lint rules.
+
 ## [1.1.0] - 06/06/2023
 * Updated for flutter 3.0
 * Fix AnimationController.dispose() called more than once

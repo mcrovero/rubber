@@ -12,20 +12,20 @@ const double _kMinFlingVelocity = 700.0;
 const double _kCompleteFlingVelocity = 5000.0;
 
 class RubberBottomSheet extends StatefulWidget {
-  const RubberBottomSheet(
-      {Key? key,
-      required this.animationController,
-      required this.lowerLayer,
-      required this.upperLayer,
-      this.menuLayer,
-      this.scrollController,
-      this.header,
-      this.headerHeight = 50.0,
-      this.dragFriction = 0.52,
-      this.onDragStart,
-      this.onDragEnd,
-      this.onTap})
-      : super(key: key);
+  const RubberBottomSheet({
+    super.key,
+    required this.animationController,
+    required this.lowerLayer,
+    required this.upperLayer,
+    this.menuLayer,
+    this.scrollController,
+    this.header,
+    this.headerHeight = 50.0,
+    this.dragFriction = 0.52,
+    this.onDragStart,
+    this.onDragEnd,
+    this.onTap,
+  });
 
   final ScrollController? scrollController;
   final Widget lowerLayer;
@@ -58,15 +58,18 @@ class RubberBottomSheet extends StatefulWidget {
   /// animation state
   final RubberAnimationController animationController;
 
-  static RubberBottomSheetState? of(BuildContext context,
-      {bool nullOk = false}) {
-    final RubberBottomSheetState? result =
-        context.findAncestorStateOfType<RubberBottomSheetState>();
+  static RubberBottomSheetState? of(
+    BuildContext context, {
+    bool nullOk = false,
+  }) {
+    final RubberBottomSheetState? result = context
+        .findAncestorStateOfType<RubberBottomSheetState>();
     if (nullOk || result != null) return result;
     throw FlutterError(
-        'RubberBottomSheet.of() called with a context that does not contain a RubberBottomSheet.\n'
-        'No RubberBottomSheet ancestor could be found starting from the context that was passed to RubberBottomSheet.of(). '
-        '  $context');
+      'RubberBottomSheet.of() called with a context that does not contain a RubberBottomSheet.\n'
+      'No RubberBottomSheet ancestor could be found starting from the context that was passed to RubberBottomSheet.of(). '
+      '  $context',
+    );
   }
 
   @override
@@ -105,17 +108,17 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
 
   /// If set true the drag won't move the bottomsheet but the scrolling will be always active
   bool _forceScrolling = false;
-  forceScroll(bool force) {
+  void forceScroll(bool force) {
     _forceScrolling = force;
     _setScrolling(force);
   }
 
-  updateScroll(bool scroll) {
+  void updateScroll(bool scroll) {
     _setScrolling(scroll);
   }
 
   bool _enabled = true;
-  set enable(value) {
+  set enable(bool value) {
     _enabled = value;
   }
 
@@ -140,13 +143,14 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
   }
 
   Widget _buildSlideAnimation(BuildContext context, Widget? child) {
-    var layout;
+    Widget layout;
     if (widget.menuLayer != null) {
       layout = Stack(
         children: <Widget>[
           Align(
-              alignment: Alignment.bottomLeft,
-              child: _buildAnimatedBottomsheetWidget(context, child)),
+            alignment: Alignment.bottomLeft,
+            child: _buildAnimatedBottomsheetWidget(context, child),
+          ),
           Align(alignment: Alignment.bottomLeft, child: widget.menuLayer),
         ],
       );
@@ -166,16 +170,17 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
 
   Widget _buildAnimatedBottomsheetWidget(BuildContext context, Widget? child) {
     return FractionallySizedBox(
-        alignment: Alignment.bottomCenter,
-        heightFactor: widget.animationController.value,
-        child: child);
+      alignment: Alignment.bottomCenter,
+      heightFactor: widget.animationController.value,
+      child: child,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     _screenHeight = screenSize.height;
-    var peak = Container(
+    var peak = SizedBox(
       key: _keyPeak,
       height: widget.headerHeight,
       child: widget.header,
@@ -191,7 +196,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
         ),
       ],
     );
-    var elem;
+    Widget elem;
     if (_display) {
       elem = AnimatedBuilder(
         animation: controller,
@@ -205,7 +210,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
       key: _keyWidget,
       children: <Widget>[
         widget.lowerLayer,
-        Align(child: elem, alignment: Alignment.bottomRight),
+        Align(alignment: Alignment.bottomRight, child: elem),
       ],
     );
   }
@@ -225,8 +230,9 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
       }
       if (_shouldScroll) {
         assert(_hold == null);
-        if (_scrollController != null && _scrollController!.hasClients)
+        if (_scrollController != null && _scrollController!.hasClients) {
           _hold = _scrollController!.position.hold(_disposeHold);
+        }
       }
     }
   }
@@ -251,7 +257,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
         }
       } else {
         var friction = 1.0;
-        var diff;
+        double? diff;
         // Friction if more than upper
         if (controller.value > controller.upperBound!) {
           diff = controller.value - controller.upperBound!;
@@ -277,8 +283,9 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
 
           _setScrolling(true);
           var startDetails = DragStartDetails(
-              sourceTimeStamp: details.sourceTimeStamp,
-              globalPosition: details.globalPosition);
+            sourceTimeStamp: details.sourceTimeStamp,
+            globalPosition: details.globalPosition,
+          );
           _hold = _scrollController!.position.hold(_disposeHold);
           _drag = _scrollController!.position.drag(startDetails, _disposeDrag);
         } else {
@@ -288,7 +295,7 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
     }
   }
 
-  _setScrolling(bool scroll) {
+  void _setScrolling(bool scroll) {
     if (_shouldScroll) {
       _scrolling = scroll;
     }
@@ -326,18 +333,27 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
       } else {
         if (details.velocity.pixelsPerSecond.dy.abs() >
             _kCompleteFlingVelocity) {
-          controller.fling(controller.lowerBound, controller.upperBound,
-              velocity: flingVelocity);
+          controller.fling(
+            controller.lowerBound,
+            controller.upperBound,
+            velocity: flingVelocity,
+          );
         } else {
           if (halfState) {
             if (details.velocity.pixelsPerSecond.dy.abs() >
                 _kMinFlingVelocity) {
               if (controller.value > controller.halfBound!) {
-                controller.fling(controller.halfBound, controller.upperBound,
-                    velocity: flingVelocity);
+                controller.fling(
+                  controller.halfBound,
+                  controller.upperBound,
+                  velocity: flingVelocity,
+                );
               } else {
-                controller.fling(controller.lowerBound, controller.halfBound,
-                    velocity: flingVelocity);
+                controller.fling(
+                  controller.lowerBound,
+                  controller.halfBound,
+                  velocity: flingVelocity,
+                );
               }
             } else {
               if (controller.value >
@@ -353,8 +369,11 @@ class RubberBottomSheetState extends State<RubberBottomSheet>
           } else {
             if (details.velocity.pixelsPerSecond.dy.abs() >
                 _kMinFlingVelocity) {
-              controller.fling(controller.lowerBound, controller.upperBound,
-                  velocity: flingVelocity);
+              controller.fling(
+                controller.lowerBound,
+                controller.upperBound,
+                velocity: flingVelocity,
+              );
             } else {
               if (controller.value >
                   (controller.upperBound! + controller.lowerBound!) / 2) {

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class DefaultPage extends StatefulWidget {
-  DefaultPage({Key? key}) : super(key: key);
+  const DefaultPage({super.key});
 
   @override
-  _DefaultPageState createState() => _DefaultPageState();
+  State<DefaultPage> createState() => _DefaultPageState();
 }
 
 class _DefaultPageState extends State<DefaultPage>
@@ -15,10 +15,11 @@ class _DefaultPageState extends State<DefaultPage>
   @override
   void initState() {
     _controller = RubberAnimationController(
-        vsync: this,
-        halfBoundValue: AnimationControllerValue(percentage: 0.5),
-        lowerBoundValue: AnimationControllerValue(pixel: 200),
-        duration: Duration(milliseconds: 200));
+      vsync: this,
+      halfBoundValue: AnimationControllerValue(percentage: 0.5),
+      lowerBoundValue: AnimationControllerValue(pixel: 200),
+      duration: Duration(milliseconds: 200),
+    );
     _controller.addStatusListener(_statusListener);
     _controller.animationState.addListener(_stateListener);
     super.initState();
@@ -32,11 +33,11 @@ class _DefaultPageState extends State<DefaultPage>
   }
 
   void _stateListener() {
-    print("state changed ${_controller.animationState.value}");
+    debugPrint("state changed ${_controller.animationState.value}");
   }
 
   void _statusListener(AnimationStatus status) {
-    print("changed status ${_controller.status}");
+    debugPrint("changed status ${_controller.status}");
   }
 
   void _expand() {
@@ -47,17 +48,12 @@ class _DefaultPageState extends State<DefaultPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Default",
-          style: TextStyle(color: Colors.cyan[900]),
-        ),
+        title: Text("Default", style: TextStyle(color: Colors.cyan[900])),
       ),
-      body: Container(
-        child: RubberBottomSheet(
-          lowerLayer: _getLowerLayer(),
-          upperLayer: _getUpperLayer(),
-          animationController: _controller,
-        ),
+      body: RubberBottomSheet(
+        lowerLayer: _getLowerLayer(),
+        upperLayer: _getUpperLayer(),
+        animationController: _controller,
       ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
@@ -87,14 +83,10 @@ class _DefaultPageState extends State<DefaultPage>
   }
 
   Widget _getLowerLayer() {
-    return Container(
-      decoration: BoxDecoration(color: Colors.cyan[100]),
-    );
+    return Container(decoration: BoxDecoration(color: Colors.cyan[100]));
   }
 
   Widget _getUpperLayer() {
-    return Container(
-      decoration: BoxDecoration(color: Colors.cyan),
-    );
+    return Container(decoration: BoxDecoration(color: Colors.cyan));
   }
 }

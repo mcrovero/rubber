@@ -10,27 +10,25 @@ import 'spring.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primaryColor: Colors.cyan,
-      ),
-      home: HomePage(
-        title: "Home",
-      ),
+      theme: ThemeData(primaryColor: Colors.cyan),
+      home: HomePage(title: "Home"),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key, required this.title}) : super(key: key);
+  const HomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage>
@@ -39,10 +37,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(color: Colors.cyan[900]),
-        ),
+        title: Text(widget.title, style: TextStyle(color: Colors.cyan[900])),
       ),
       body: ListView(
         children: <Widget>[

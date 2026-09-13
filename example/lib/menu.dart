@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:rubber/rubber.dart';
 
 class MenuPage extends StatefulWidget {
-  MenuPage({Key? key}) : super(key: key);
+  const MenuPage({super.key});
 
   @override
-  _MenuPageState createState() => _MenuPageState();
+  State<MenuPage> createState() => _MenuPageState();
 }
 
 class _MenuPageState extends State<MenuPage>
@@ -25,27 +25,25 @@ class _MenuPageState extends State<MenuPage>
   }
 
   void _expand() {
-    print("expand");
-    _controller.launchTo(_controller.value, _controller.upperBound,
-        velocity: 2);
+    debugPrint("expand");
+    _controller.launchTo(
+      _controller.value,
+      _controller.upperBound,
+      velocity: 2,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Menu",
-          style: TextStyle(color: Colors.cyan[900]),
-        ),
+        title: Text("Menu", style: TextStyle(color: Colors.cyan[900])),
       ),
-      body: Container(
-        child: RubberBottomSheet(
-          lowerLayer: _getLowerLayer(),
-          upperLayer: _getUpperLayer(),
-          menuLayer: _getMenuLayer(),
-          animationController: _controller,
-        ),
+      body: RubberBottomSheet(
+        lowerLayer: _getLowerLayer(),
+        upperLayer: _getUpperLayer(),
+        menuLayer: _getMenuLayer(),
+        animationController: _controller,
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "flt3",
@@ -58,24 +56,18 @@ class _MenuPageState extends State<MenuPage>
   }
 
   Widget _getLowerLayer() {
-    return Container(
-      decoration: BoxDecoration(color: Colors.cyan[100]),
-    );
+    return Container(decoration: BoxDecoration(color: Colors.cyan[100]));
   }
 
   Widget _getUpperLayer() {
-    return Container(
-      decoration: BoxDecoration(color: Colors.cyan),
-    );
+    return Container(decoration: BoxDecoration(color: Colors.cyan));
   }
 
   Widget _getMenuLayer() {
     return Container(
       height: 100,
-      child: Center(
-        child: Text("MENU"),
-      ),
       decoration: BoxDecoration(color: Colors.red),
+      child: Center(child: Text("MENU")),
     );
   }
 }

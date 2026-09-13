@@ -1,7 +1,7 @@
 /// Rubber Model
 ///
 /// To use, `import 'package:rubber/rubber.dart';`.
-library rubber;
+library;
 
 export 'src/animation_controller.dart';
 export 'src/bottom_sheet.dart';

@@ -1,0 +1,6 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # These names are part of the package's established public API.
+    constant_identifier_names: false
